@@ -6,28 +6,30 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
-public class SendMessageTask extends AsyncTask<Integer, Void, Void> {
+import java.util.Map;
+
+public class SendMessageTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = SendMessageTask.class.getSimpleName();
     private static final String fcmProjectSenderId = VALUES.FCM_PROJECT_SENDER_ID;
     private final FirebaseMessaging fm;
+    private Map<String, String> dataPayload;
+    private String messageId;
 
-    public SendMessageTask() {
+    public SendMessageTask(Map<String, String> dataPayload, String messageId) {
         super();
         fm = FirebaseMessaging.getInstance();
-
+        this.dataPayload = dataPayload;
+        this.messageId = messageId;
     }
 
     @Override
-    protected Void doInBackground(Integer... params) {
-        int count = params[0];
-        String id = "1001";
+    protected Void doInBackground(Void... params) {
         fm.send(new RemoteMessage.Builder(fcmProjectSenderId + "@gcm.googleapis.com")
-                .setMessageId(id)
-                .addData("count", String.valueOf(count))
-                .addData("messageType", "reply-test")
+                .setMessageId(messageId)
+                .setData(dataPayload)
                 .build());
-        Log.d(TAG, "Sent reply test with count: " + count);
+        Log.d(TAG, "Message sent with data: " + dataPayload);
         return null;
     }
 }

@@ -12,11 +12,14 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 import spikey.com.freeride.MainActivity;
 import spikey.com.freeride.R;
+import spikey.com.freeride.Task;
 
 
 public class CloudMessagingService extends FirebaseMessagingService {
@@ -36,20 +39,27 @@ public class CloudMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage); //todo ???
         Log.d(TAG, "Message received.");
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            if (Objects.equals(remoteMessage.getData().get("messageType"), "reply-test")) {
+            String messageType = remoteMessage.getData().get("messageType");
+            if (messageType.equals("reply-test")) {
                 String count = remoteMessage.getData().get("count");
-                handleReplyTestMessage(count);
-            } else if (remoteMessage.getData().containsKey("task")) {
+                replyToTestMessage(count, remoteMessage.getMessageId());
+            } else if (messageType.equals("new-task")) {
+                String jsonTask = remoteMessage.getData().get("task");
+                Task task = new Gson().fromJson(jsonTask, Task.class);
 
-                //Task task =  TODO GSON
-                //TODO not gson anymoooore!
+                /*TODO (much later) calculate location and Reputation Score
+                Can store Rep on database, and only give location*/
+                replyToNewTaskMessage("100", "100", remoteMessage.getMessageId());
+
             }
         }
+
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
@@ -69,21 +79,37 @@ public class CloudMessagingService extends FirebaseMessagingService {
         // Data payload received as intent
         if (intent.hasExtra("count")) {
             String count = intent.getStringExtra("count");
-            //handleReplyTestMessage(count);
+            //replyToTestMessage(count);
             //Datapayload message received as message and as intent
         }
     }
 
     //Sends test message back to server until count reached
     //Testing messaging functionality
-    public void handleReplyTestMessage(String count) {
+    public void replyToTestMessage(String count, String messageId) {
         final int countVal = Integer.parseInt(count) +1;
         if (countVal > 5) {
             return;
         }
+        Map<String, String> dataPayload = new HashMap<>();
+        dataPayload.put("messageType", "reply-test");
+        dataPayload.put("count", String.valueOf(countVal));
 
-        SendMessageTask sendMessageTask = new SendMessageTask();
-        sendMessageTask.execute(countVal, null, null);
+        SendMessageTask sendMessageTask = new SendMessageTask(dataPayload, messageId);
+        sendMessageTask.execute(null, null, null);
+    }
+
+    //Sends test message back to server until count reached
+    //Testing messaging functionality
+    public void replyToNewTaskMessage(String locationScore, String reputationScore, String messageId) {
+
+        Map<String, String> dataPayload = new HashMap<>();
+        dataPayload.put("messageType", "new-task-reply");
+        dataPayload.put("locationScore", locationScore);
+        dataPayload.put("reputationScore", reputationScore);
+
+        SendMessageTask sendMessageTask = new SendMessageTask(dataPayload, messageId);
+        sendMessageTask.execute(null, null, null);
     }
 
     private void createNotification(String messageBody) {

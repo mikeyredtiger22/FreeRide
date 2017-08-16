@@ -21,9 +21,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         checkPlayServices();
         final FirebaseMessaging fm = FirebaseMessaging.getInstance();
-        fm.subscribeToTopic("client");
-        SendMessageTask sendMessageTask = new SendMessageTask();
-        sendMessageTask.execute(1, null, null);
+        fm.subscribeToTopic("test");
+        //SendMessageTask sendMessageTask = new SendMessageTask();
+        //sendMessageTask.execute(1, null, null);
+
 //        mainTextView = (TextView) findViewById(R.id.main_text_view);
 //        button = (Button) findViewById(R.id.send_upstream);
 //        button.setOnClickListener(new View.OnClickListener() {
