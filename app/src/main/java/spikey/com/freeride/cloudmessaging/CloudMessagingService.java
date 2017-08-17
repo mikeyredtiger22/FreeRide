@@ -39,56 +39,60 @@ public class CloudMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage); //todo ???
         Log.d(TAG, "Message received.");
 
         // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
+        Map<String, String> messageData = remoteMessage.getData();
+        if (messageData.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            String messageType = remoteMessage.getData().get("messageType");
-            if (messageType.equals("reply-test")) {
-                String count = remoteMessage.getData().get("count");
-                replyToTestMessage(count, remoteMessage.getMessageId());
-            } else if (messageType.equals("new-task")) {
-                String jsonTask = remoteMessage.getData().get("task");
-                Task task = new Gson().fromJson(jsonTask, Task.class);
 
-                /*TODO (much later) calculate location and Reputation Score
-                Can store Rep on database, and only give location*/
-                replyToNewTaskMessage("100", "100", remoteMessage.getMessageId());
+            String messageType = messageData.get("messageType");
+            switch (messageType) {
+                case "reply-test":
+                    String count = messageData.get("count");
+                    replyToTestMessage(count, remoteMessage.getMessageId());
+                    break;
+                case "new-task":
+                    //String jsonTask = messageData.get("task");
+                    //Task task = new Gson().fromJson(jsonTask, Task.class);
 
+                    /*TODO (much later) calculate location and Reputation Score
+                    Can store Rep on database, and only give location*/
+                    //replyToNewTaskMessage("100", "100", remoteMessage.getMessageId());
+                    replyToNewTaskMessageViaDatabase(messageData.get("task"));
+                    break;
+                case "new-task-notification":
+                    newTaskNotification(remoteMessage.getNotification(), messageData.get("taskData"));
+                    break;
             }
-        }
 
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
-            createNotification(remoteMessage.getNotification().getBody());
+            // Check if message contains a notification payload.
+//            if (remoteMessage.getNotification() != null) {
+//                Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
+//                createNotification(remoteMessage.getNotification().getBody());
+//            }
         }
     }
 
+
+    //All message types received as intent (after OnMessageReceived - if called)
     @Override
     public void handleIntent(Intent intent) {
         super.handleIntent(intent);
+        /*
         Bundle bundleExtras = intent.getExtras();
         String extras = "";
         if (bundleExtras != null) {
             extras = bundleExtras.toString();
         }
-        Log.d(TAG, "Intent extras: " + extras);
-        // Data payload received as intent
-        if (intent.hasExtra("count")) {
-            String count = intent.getStringExtra("count");
-            //replyToTestMessage(count);
-            //Datapayload message received as message and as intent
-        }
+        Log.d(TAG, "Intent extras: " + extras);*/
     }
 
     //Sends test message back to server until count reached
     //Testing messaging functionality
     public void replyToTestMessage(String count, String messageId) {
         final int countVal = Integer.parseInt(count) +1;
-        if (countVal > 5) {
+        if (countVal > 8) {
             return;
         }
         Map<String, String> dataPayload = new HashMap<>();
@@ -108,11 +112,33 @@ public class CloudMessagingService extends FirebaseMessagingService {
         dataPayload.put("locationScore", locationScore);
         dataPayload.put("reputationScore", reputationScore);
 
+        //VERY UNRELIABLE UPSTREAM MESSAGING.
         SendMessageTask sendMessageTask = new SendMessageTask(dataPayload, messageId);
         sendMessageTask.execute(null, null, null);
+        Log.d(TAG, "Sent user data reply to new task message");
     }
 
-    private void createNotification(String messageBody) {
+    //Sends test message back to server until count reached
+    //Testing messaging functionality
+    public void replyToNewTaskMessageViaDatabase(String taskData) {
+
+        Map<String, String> dataPayload = new HashMap<>();
+        dataPayload.put("messageType", "new-task-reply");
+        dataPayload.put("locationScore", "100");
+        dataPayload.put("reputationScore", "100");
+        dataPayload.put("taskData", taskData);
+
+        DatabaseOperations.addMessage(dataPayload);
+        Log.d(TAG, "Sent message to database");
+    }
+
+    private void newTaskNotification(RemoteMessage.Notification notification, String taskData) {
+        Task newTask = new Gson().fromJson(taskData, Task.class);
+        Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
+        createNotification(notification);
+    }
+
+    private void createNotification(RemoteMessage.Notification notification) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent resultIntent = PendingIntent.getActivity(this , 0, intent,
@@ -122,8 +148,8 @@ public class CloudMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(this)
                 //todo newer Building - learn notification channels
                 .setSmallIcon(R.drawable.ic_stat_name)
-                .setContentTitle("New Notification - From the Cloud")
-                .setContentText(messageBody)
+                .setContentTitle(notification.getTitle()) //use default values if null
+                .setContentText(notification.getBody())
                 .setAutoCancel(true)
                 .setSound(notificationSoundURI);
 
