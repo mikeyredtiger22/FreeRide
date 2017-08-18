@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -57,12 +57,16 @@ public class CloudMessagingService extends FirebaseMessagingService {
                     //Task task = new Gson().fromJson(jsonTask, Task.class);
 
                     /*TODO (much later) calculate location and Reputation Score
+                    using messageData.get("task")
                     Can store Rep on database, and only give location*/
                     //replyToNewTaskMessage("100", "100", remoteMessage.getMessageId());
-                    replyToNewTaskMessageViaDatabase(messageData.get("task"));
+                    String userId = FirebaseInstanceId.getInstance().getToken(); //todo clean
+                    Log.d(TAG, "FB token: " + userId);
+                    replyToNewTaskMessageViaDatabase(messageData.get("taskId"), userId);
                     break;
                 case "new-task-notification":
-                    newTaskNotification(remoteMessage.getNotification(), messageData.get("taskData"));
+                    newTaskNotification(remoteMessage.getNotification(),
+                            messageData.get("taskData"), messageData.get("taskId"));
                     break;
             }
 
@@ -120,22 +124,30 @@ public class CloudMessagingService extends FirebaseMessagingService {
 
     //Sends test message back to server until count reached
     //Testing messaging functionality
-    public void replyToNewTaskMessageViaDatabase(String taskData) {
+    public void replyToNewTaskMessageViaDatabase(String taskId, String userId) {
 
-        Map<String, String> dataPayload = new HashMap<>();
+        Map<String, Object> dataPayload = new HashMap<>();
         dataPayload.put("messageType", "new-task-reply");
+        dataPayload.put("taskId", taskId); //todo remove after checking
+        dataPayload.put("userId", userId);
         dataPayload.put("locationScore", "100");
         dataPayload.put("reputationScore", "100");
-        dataPayload.put("taskData", taskData);
 
-        DatabaseOperations.addMessage(dataPayload);
-        Log.d(TAG, "Sent message to database");
+        DatabaseOperations.sendUserTaskInfo(dataPayload, taskId);
+        Log.d(TAG, "Sent message to database: " + dataPayload);
     }
 
-    private void newTaskNotification(RemoteMessage.Notification notification, String taskData) {
+    private void newTaskNotification(RemoteMessage.Notification notification, String taskData, String taskId) {
         Task newTask = new Gson().fromJson(taskData, Task.class);
         Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification);
+        ////////////
+        secureTask(taskId);
+    }
+
+    private void secureTask(String taskId) {
+        String userId = FirebaseInstanceId.getInstance().getToken();
+        DatabaseOperations.secureTask(taskId, userId);
     }
 
     private void createNotification(RemoteMessage.Notification notification) {

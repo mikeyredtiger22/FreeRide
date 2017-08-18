@@ -3,11 +3,14 @@ package spikey.com.freeride;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import spikey.com.freeride.cloudmessaging.DatabaseOperations;
 import spikey.com.freeride.cloudmessaging.SendMessageTask;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,13 +37,22 @@ public class MainActivity extends AppCompatActivity {
 //                sendMessageTask.execute(null, null, null);
 //            }
 //        });
+        final Button buttonDbTest = findViewById(R.id.db_test);
+        buttonDbTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseOperations.databaseMessageTest();
+            }
+        });
     }
 
     @Override
     protected void onResume() {
-        Log.d("new", "\n");
+        Log.d(TAG, " New Instance App Resume \n");
         super.onResume();
         checkPlayServices();
+        //DatabaseOperations.listen();
+        //DatabaseOperations.databaseMessageTest();
     }
 
     //still useful?
