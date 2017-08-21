@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 
+import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.MainActivity;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
@@ -53,13 +54,8 @@ public class CloudMessagingService extends FirebaseMessagingService {
                     replyToTestMessage(count, remoteMessage.getMessageId());
                     break;
                 case "new-task":
-                    //String jsonTask = messageData.get("task");
-                    //Task task = new Gson().fromJson(jsonTask, Task.class);
-
-                    /*TODO (much later) calculate location and Reputation Score
-                    using messageData.get("task")
-                    Can store Rep on database, and only give location*/
-                    //replyToNewTaskMessage("100", "100", remoteMessage.getMessageId());
+                    //Task task = new Gson().fromJson(messageData.get("task"), Task.class);
+                    //TODO (much later) calculate location and Reputation Score
                     String userId = FirebaseInstanceId.getInstance().getToken(); //todo clean
                     Log.d(TAG, "FB token: " + userId);
                     replyToNewTaskMessageViaDatabase(messageData.get("taskId"), userId);
@@ -69,12 +65,6 @@ public class CloudMessagingService extends FirebaseMessagingService {
                             messageData.get("taskData"), messageData.get("taskId"));
                     break;
             }
-
-            // Check if message contains a notification payload.
-//            if (remoteMessage.getNotification() != null) {
-//                Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
-//                createNotification(remoteMessage.getNotification().getBody());
-//            }
         }
     }
 
@@ -92,8 +82,14 @@ public class CloudMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Intent extras: " + extras);*/
     }
 
-    //Sends test message back to server until count reached
-    //Testing messaging functionality
+    /**
+     * Server and client sending message back and forth, incrementing a counter.
+     * Used to test connectivity between server and client, see where messaging breaks
+     * and see how long messages take to get sent.
+     * The client end sets a limit to the counter value.
+     * @param count of received message
+     * @param messageId to send message to (server/fcm)
+     */
     public void replyToTestMessage(String count, String messageId) {
         final int countVal = Integer.parseInt(count) +1;
         if (countVal > 8) {
@@ -107,8 +103,13 @@ public class CloudMessagingService extends FirebaseMessagingService {
         sendMessageTask.execute(null, null, null);
     }
 
-    //Sends test message back to server until count reached
-    //Testing messaging functionality
+    /**
+     * DEPRECATED - Not used anymore because of unreliable upstream messaging (from client)
+     * Will be useful again if upstream messaging becomes reliable
+     * @param locationScore
+     * @param reputationScore
+     * @param messageId
+     */
     public void replyToNewTaskMessage(String locationScore, String reputationScore, String messageId) {
 
         Map<String, String> dataPayload = new HashMap<>();
@@ -122,8 +123,12 @@ public class CloudMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Sent user data reply to new task message");
     }
 
-    //Sends test message back to server until count reached
-    //Testing messaging functionality
+    /**
+     * Sends User Task Info (Map) to database. Info is stored and read by the server
+     * Client adds their location score (depending on task and user location)
+     * @param taskId of task
+     * @param userId of user
+     */
     public void replyToNewTaskMessageViaDatabase(String taskId, String userId) {
 
         Map<String, Object> dataPayload = new HashMap<>();
@@ -137,20 +142,35 @@ public class CloudMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Sent message to database: " + dataPayload);
     }
 
+    /**
+     * Creates a notification for the user from the task data received from the server
+     * @param notification payload received
+     * @param taskData from server
+     * @param taskId of task
+     */
     private void newTaskNotification(RemoteMessage.Notification notification, String taskData, String taskId) {
         Task newTask = new Gson().fromJson(taskData, Task.class);
         Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification);
-        ////////////
+        ////////////TODO if user accepts task
         secureTask(taskId);
     }
 
+    /**
+     * Attempts to change the user field of a task to this user's Id.
+     * @param taskId
+     */
     private void secureTask(String taskId) {
         String userId = FirebaseInstanceId.getInstance().getToken();
         DatabaseOperations.secureTask(taskId, userId);
     }
 
+    /**
+     * Display a notification to the user
+     * @param notification to display
+     */
     private void createNotification(RemoteMessage.Notification notification) {
+        //TODO customise notification, add intent to open task details
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent resultIntent = PendingIntent.getActivity(this , 0, intent,

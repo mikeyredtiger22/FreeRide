@@ -8,10 +8,8 @@ import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.messaging.FirebaseMessaging;
-
-import spikey.com.freeride.cloudmessaging.DatabaseOperations;
-import spikey.com.freeride.cloudmessaging.SendMessageTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, " New Instance App Resume \n");
         super.onResume();
         checkPlayServices();
+        DatabaseOperations.connectedToDatabase();
+        DatabaseReference.goOnline();////////////////
         //DatabaseOperations.listen();
         //DatabaseOperations.databaseMessageTest();
     }

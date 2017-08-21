@@ -122,20 +122,4 @@ public class Task {
     public void setIncentive(double incentive) {
         this.incentive = incentive;
     }
-
-    @Override
-    public String toString() {
-        return String.valueOf(
-                startLocationLatitude + ", " +
-                startLocationLongitude + ", " +
-                endLocationLatitude + ", " +
-                endLocationLongitude + ", " +
-                creationLocalDateTime + ", " +
-                expirationLocalDateTime + ", " +
-                title + ", " +
-                description + ", " +
-                state  + ", " +
-                user  + ", " +
-                incentive);
-    }
 }
