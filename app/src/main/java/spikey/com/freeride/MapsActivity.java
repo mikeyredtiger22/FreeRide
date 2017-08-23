@@ -42,8 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
-        // Better performance if 'content doesn't change layout size of the RecyclerView':
-        //tasksRecyclerView.setHasFixedSize(true);
+        tasksRecyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 this, LinearLayoutManager.HORIZONTAL, false);
@@ -54,6 +53,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         PagerSnapHelper PsnapHelper = new PagerSnapHelper();
         PsnapHelper.attachToRecyclerView(tasksRecyclerView);
+
+
+        TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(
+                this, getResources().getColor(R.color.colorBlueDark),
+                getResources().getColor(R.color.colorAccent));
+        tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
+
     }
 
 

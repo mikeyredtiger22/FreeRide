@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         app:cardElevation="12dp"
         app:cardCornerRadius="4dp"
-        android:layout_margin="16dp"
+        android:layout_margin="8dp"
         app:cardBackgroundColor="@android:color/holo_blue_light"
         >
 
