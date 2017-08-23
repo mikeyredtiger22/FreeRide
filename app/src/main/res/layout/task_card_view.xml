@@ -1,6 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</LinearLayout>
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="4dp"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="@android:color/holo_blue_light"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            >
+
+            <!--<TextView-->
+            <!--android:id="@+id/card_text"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--style="@style/TextAppearance.AppCompat.Body2"-->
+            <!--tools:text="Title: title\nDescription: desc\nTime: 00:00"-->
+            <!--android:textColor="@color/colorPrimaryDark"-->
+            <!--/>-->
+
+            <TextView
+                android:id="@+id/task_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:text="Title" />
+
+            <TextView
+                android:id="@+id/task_start_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/task_title"
+                android:text="Start Location" />
+
+            <TextView
+                android:id="@+id/task_end_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/task_start_location"
+                android:text="End Location" />
+
+            <TextView
+                android:id="@+id/task_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/task_end_location"
+                android:text="Time" />
+
+            <TextView
+                android:id="@+id/task_distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/task_time"
+                android:text="Distance" />
+
+            <TextView
+                android:id="@+id/task_extra"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/task_distance"
+                android:text="Extra" />
+
+            <Button
+                android:id="@+id/task_raised_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:textColor="@android:color/white"
+                android:text="BUTTON 2"/>
+
+            <Button
+                android:id="@+id/task_flat_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toStartOf="@id/task_raised_button"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:textColor="@android:color/white"
+                android:text="BUTTON 1"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+</FrameLayout>

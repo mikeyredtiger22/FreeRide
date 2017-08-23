@@ -1,7 +1,10 @@
 package spikey.com.freeride;
 
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -12,7 +15,9 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import spikey.com.freeride.cloudmessaging.VALUES;
@@ -94,6 +99,39 @@ public class DatabaseOperations {
                 } else {
                     Log.d(TAG, "Error on securing task : " + databaseError);
                 }
+            }
+        });
+    }
+
+    /**
+     * Returns all available tasks from database as Json tree / string??
+     */
+    public static void getAvailableTasks(final TextView resultsTextView, final Context context) {
+        connectedToDatabase();
+        DatabaseReference allTasksRef = mDatabaseTasks;
+        allTasksRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) { //TODO clean - must be better way
+                StringBuilder tasksDataStringBuilder = new StringBuilder("[");
+                Gson gson = new Gson();
+                Iterator<DataSnapshot> tasksIterator = dataSnapshot.getChildren().iterator();
+                if (tasksIterator.hasNext()) {
+                    tasksDataStringBuilder.append(gson.toJson(tasksIterator.next().getValue()));
+                }
+                while (tasksIterator.hasNext()) {
+                    tasksDataStringBuilder.append("," + gson.toJson(tasksIterator.next().getValue()));
+                }
+                String tasksData = tasksDataStringBuilder.append("]").toString();
+                resultsTextView.setText(tasksData);
+                Intent openTasksView = new Intent(context, MapsActivity.class);
+                openTasksView.putExtra("tasks", tasksData);
+                context.startActivity(openTasksView);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "OnCancelled: " + databaseError);
             }
         });
     }

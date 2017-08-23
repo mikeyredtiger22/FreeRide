@@ -19,6 +19,7 @@ import java.util.Map;
 
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.MainActivity;
+import spikey.com.freeride.MapsActivity;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
@@ -151,7 +152,7 @@ public class CloudMessagingService extends FirebaseMessagingService {
     private void newTaskNotification(RemoteMessage.Notification notification, String taskData, String taskId) {
         Task newTask = new Gson().fromJson(taskData, Task.class);
         Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
-        createNotification(notification);
+        createNotification(notification, taskData);
         ////////////TODO if user accepts task
         secureTask(taskId);
     }
@@ -169,9 +170,10 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * Display a notification to the user
      * @param notification to display
      */
-    private void createNotification(RemoteMessage.Notification notification) {
+    private void createNotification(RemoteMessage.Notification notification, String taskData) {
         //TODO customise notification, add intent to open task details
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("task", taskData);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent resultIntent = PendingIntent.getActivity(this , 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
