@@ -1,5 +1,7 @@
 package spikey.com.freeride;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class Task {
 
     private double startLocationLatitude;
@@ -121,5 +123,13 @@ public class Task {
 
     public void setIncentive(double incentive) {
         this.incentive = incentive;
+    }
+
+    public LatLng getStartLatLng(){
+        return new LatLng(startLocationLatitude, startLocationLongitude);
+    }
+
+    public LatLng getEndLatLng(){
+        return new LatLng(endLocationLatitude, endLocationLongitude);
     }
 }

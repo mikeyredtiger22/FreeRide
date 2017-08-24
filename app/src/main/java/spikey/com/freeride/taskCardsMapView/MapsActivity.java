@@ -1,15 +1,13 @@
-package spikey.com.freeride;
+package spikey.com.freeride.taskCardsMapView;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SnapHelper;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,18 +17,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import spikey.com.freeride.R;
+import spikey.com.freeride.Task;
 
+public class MapsActivity extends FragmentActivity {
+
+
+    private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map_view);
-        mapFragment.getMapAsync(this);
 
         Task[] tasks = null;
         Intent intent = getIntent();
@@ -55,31 +54,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PsnapHelper.attachToRecyclerView(tasksRecyclerView);
 
 
+        SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
+
         TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(
-                this, getResources().getColor(R.color.colorBlueDark),
+                tasks, markersSwitch.isChecked(), getResources().getColor(R.color.colorBlueDark),
                 getResources().getColor(R.color.colorAccent));
         tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
 
+        markersSwitch.setOnCheckedChangeListener(taskIndicatorDecoration);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_view);
+        mapFragment.getMapAsync(taskIndicatorDecoration);
+
     }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
-
 }

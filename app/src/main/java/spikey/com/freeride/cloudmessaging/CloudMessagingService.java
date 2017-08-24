@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import spikey.com.freeride.DatabaseOperations;
-import spikey.com.freeride.MainActivity;
-import spikey.com.freeride.MapsActivity;
+import spikey.com.freeride.taskCardsMapView.MapsActivity;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 

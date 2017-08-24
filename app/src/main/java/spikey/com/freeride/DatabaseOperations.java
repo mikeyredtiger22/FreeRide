@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -21,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import spikey.com.freeride.cloudmessaging.VALUES;
+import spikey.com.freeride.taskCardsMapView.MapsActivity;
 
 public class DatabaseOperations {
 
@@ -111,22 +113,27 @@ public class DatabaseOperations {
         DatabaseReference allTasksRef = mDatabaseTasks;
         allTasksRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) { //TODO clean - must be better way
-                StringBuilder tasksDataStringBuilder = new StringBuilder("[");
+            public void onDataChange(DataSnapshot dataSnapshot) { //TODO cleaner way? - use array
+                Log.d(TAG, "Get Available tasks: " + dataSnapshot.getValue());
                 Gson gson = new Gson();
                 Iterator<DataSnapshot> tasksIterator = dataSnapshot.getChildren().iterator();
                 if (tasksIterator.hasNext()) {
+                    StringBuilder tasksDataStringBuilder = new StringBuilder("[");
                     tasksDataStringBuilder.append(gson.toJson(tasksIterator.next().getValue()));
-                }
-                while (tasksIterator.hasNext()) {
-                    tasksDataStringBuilder.append("," + gson.toJson(tasksIterator.next().getValue()));
-                }
-                String tasksData = tasksDataStringBuilder.append("]").toString();
-                resultsTextView.setText(tasksData);
-                Intent openTasksView = new Intent(context, MapsActivity.class);
-                openTasksView.putExtra("tasks", tasksData);
-                context.startActivity(openTasksView);
 
+                    while (tasksIterator.hasNext()) {
+                        tasksDataStringBuilder.append(",")
+                                .append(gson.toJson(tasksIterator.next().getValue()));
+                    }
+                    String tasksData = tasksDataStringBuilder.append("]").toString();
+                    resultsTextView.setText(tasksData);
+                    Intent openTasksView = new Intent(context, MapsActivity.class);
+                    openTasksView.putExtra("tasks", tasksData);
+                    context.startActivity(openTasksView);
+                } else {
+                    // No task data received from server
+                    Toast.makeText(context, "No Tasks Available.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override

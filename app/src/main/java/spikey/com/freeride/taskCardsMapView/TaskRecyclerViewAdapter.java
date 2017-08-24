@@ -1,4 +1,4 @@
-package spikey.com.freeride;
+package spikey.com.freeride.taskCardsMapView;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,8 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import spikey.com.freeride.R;
+import spikey.com.freeride.Task;
+
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder> {
 
+    private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
     private Task[] tasks;
 
     public TaskRecyclerViewAdapter(Task[] tasks) {
