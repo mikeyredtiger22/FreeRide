@@ -1,13 +1,10 @@
 package spikey.com.freeride.taskCardsMapView;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.widget.CompoundButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -55,12 +52,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     }
 
     @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        outRect.top += 50;
-    }
-
-    @Override
     public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
         super.onDrawOver(canvas, parent, state);
 
@@ -74,15 +65,24 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         float barDrawPadding = toalBarWidth * 0.1f;
         float xPos = layoutPadding + barDrawPadding * 0.5f;
 
+        //Smaller card width:
+        LinearLayoutManager layoutManager = (LinearLayoutManager) parent.getLayoutManager();
+        boolean change = setSelectedItemPosition(layoutManager.findFirstCompletelyVisibleItemPosition());
+        if (change) {
+            drawBars(xPos, itemCount, barDrawWidth, barDrawPadding);
+            updateMap();
+        }
+        //TODO always UI improvements. find glitches
+
+        /* IF CARD WIDTH = PARENT WIDTH
         LinearLayoutManager layoutManager = (LinearLayoutManager) parent.getLayoutManager();
         int leftItemPos = layoutManager.findFirstVisibleItemPosition();
         int rightItemPos = layoutManager.findLastVisibleItemPosition();
         Log.d("Selected Item Position", leftItemPos + " : " + rightItemPos);
 
-        //todo method will need to be changed when/if cards are made smaller than screen width
         if (leftItemPos == rightItemPos) {
             // If cards are stationary and centered
-            CURRENT_SELECTED_ITEM_POSITION = leftItemPos;
+            setSelectedItemPosition(leftItemPos);
         } else {
             // If user is scrolling
             int leftDiff = CURRENT_SELECTED_ITEM_POSITION - leftItemPos;
@@ -90,15 +90,14 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
             if (leftDiff != 0 && rightDiff != 0){
                 // If user scrolls past many cards, indicator must still be updated
                 if (leftItemPos > CURRENT_SELECTED_ITEM_POSITION) {
-                    CURRENT_SELECTED_ITEM_POSITION = leftItemPos;
+                    setSelectedItemPosition(leftItemPos);
                 } else {
-                    CURRENT_SELECTED_ITEM_POSITION = rightItemPos;
+                    setSelectedItemPosition(rightDiff);
                 }
             }
-        }
+        }*/
 
         drawBars(xPos, itemCount, barDrawWidth, barDrawPadding);
-        updateMap();
     }
 
     private void drawBars(float xPos, int itemCount, float barDrawWidth, float barDrawPadding) {
@@ -144,5 +143,15 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
         Log.d(TAG, "SWITCH: " + isChecked);
         showAllMarkers = isChecked;
+    }
+
+    private boolean setSelectedItemPosition(int position) {
+        if (position != RecyclerView.NO_POSITION) {
+            if (CURRENT_SELECTED_ITEM_POSITION != position) {
+                CURRENT_SELECTED_ITEM_POSITION = position;
+                return true;
+            }
+        }
+        return false;
     }
 }

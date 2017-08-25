@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:text="Get Tasks"
         style="@style/Base.Widget.AppCompat.Button.Colored"
-        android:theme="@style/AppTheme.GreenAccent"/>
+        android:theme="@style/ColoredButton.Green"/>
 
     <Button
         android:id="@+id/button_db_connect"
@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:text="Database Connect"
         style="@style/Base.Widget.AppCompat.Button.Colored"
-        android:theme="@style/AppThemeBlueAccent"/>
+        android:theme="@style/ColoredButton.Blue"/>
 
     <TextView
         android:id="@+id/text_results"

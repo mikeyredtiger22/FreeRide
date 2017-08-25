@@ -23,16 +23,7 @@
             android:paddingEnd="8dp"
             android:paddingTop="16dp"
             android:paddingBottom="8dp"
-            >
-
-            <!--<TextView-->
-            <!--android:id="@+id/card_text"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--style="@style/TextAppearance.AppCompat.Body2"-->
-            <!--tools:text="Title: title\nDescription: desc\nTime: 00:00"-->
-            <!--android:textColor="@color/colorPrimaryDark"-->
-            <!--/>-->
+            android:theme="@style/SingleLineText">
 
             <TextView
                 android:id="@+id/task_title"
@@ -75,7 +66,7 @@
                 android:text="Distance" />
 
             <TextView
-                android:id="@+id/task_extra"
+                android:id="@+id/task_incentive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
