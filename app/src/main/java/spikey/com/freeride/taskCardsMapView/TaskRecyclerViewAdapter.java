@@ -1,5 +1,6 @@
 package spikey.com.freeride.taskCardsMapView;
 
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,51 +15,33 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
     private Task[] tasks;
-    private int edgePadding;
-    private int itemCount;
 
-    public TaskRecyclerViewAdapter(Task[] tasks) {
+    private int[] MATERIAL_COLORS;
+
+    public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS) {
         super();
         this.tasks = tasks;
+        this.MATERIAL_COLORS = MATERIAL_COLORS;
     }
 
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_card_view, parent, false);
-
-        //height - 50 for drawing of task card indicator. See TaskIndicatorDecoration.java class.
-        int height = parent.getMeasuredHeight() -50;
-        //todo calculate outside if possible
-        int width = (int) (parent.getMeasuredWidth() * 0.90); //TODO change for larger screens
-        edgePadding = (int) (parent.getMeasuredWidth() * 0.05);
-        view.setLayoutParams(new RecyclerView.LayoutParams(width, height));
         return new TaskViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(TaskViewHolder holder, int position) {
         Task task = tasks[position];
-        //todo android not happy with these set texts
-        holder.taskTitleText.setText("Title: " + task.getTitle());
-        holder.taskStartLocText.setText("Start: " + task.getStartLatLng().toString());
-        holder.taskEndLocText.setText("End: " + task.getEndLatLng().toString());
-        String test = "";
-        for (int i=0; i<position; i++) {
-            test += "hello hello hello.";
-        }
-        holder.taskTimeText.setText("Desc: " + test);
-        holder.taskDistanceText.setText("Distance: ");
-        if (position % 2 == 0) {
-            holder.taskIncentiveText.setText("\uD83D\uDCB5  \uD83D\uDCB0: £" + task.getIncentive());
-        } else {
-            holder.taskIncentiveText.setText("I");
-        }
-        Log.d(TAG, "Binding View Holder");
-        if (position == 0) {
-//            holder.setLeftPadding(edgePadding);
-        } else if (position == tasks.length - 1) {
-//            holder.setRightPadding(edgePadding);
-        }
+        //todo strings to resources when UI finalised
+        holder.setCardBackgroundColor(position);
+        holder.taskTitleText    .setText(String.format("Title: %s", task.getTitle()));
+        holder.taskStartLocText .setText(String.format("Start: %s", task.getStartLatLng().toString()));
+        holder.taskEndLocText   .setText(String.format("End: %s",   task.getEndLatLng().toString()));
+        holder.taskTimeText     .setText(String.format("Desc: %s",  task.getDescription()));
+        holder.taskDistanceText .setText(String.format("Distance: "));
+        holder.taskIncentiveText.setText(String.format("\uD83D\uDCB5\uD83D\uDCB0= £%s", task.getIncentive()));
+        Log.d(TAG, "Binding View Holder pos: " + position);
     }
 
     @Override
@@ -68,7 +51,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
 
-        View itemView;
+        CardView taskCardView;
         TextView taskTitleText;
         TextView taskStartLocText;
         TextView taskEndLocText;
@@ -78,7 +61,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
         public TaskViewHolder(View itemView) {
             super(itemView);
-            this.itemView = itemView;
+            this.taskCardView = itemView.findViewById(R.id.task_card);
             taskTitleText = itemView.findViewById(R.id.task_title);
             taskStartLocText = itemView.findViewById(R.id.task_start_location);
             taskEndLocText = itemView.findViewById(R.id.task_end_location);
@@ -87,15 +70,8 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             taskIncentiveText = itemView.findViewById(R.id.task_incentive);
         }
 
-        public void setLeftPadding(int padding) {
-            itemView.setPadding(padding, itemView.getPaddingTop(),
-                    itemView.getPaddingRight(), itemView.getPaddingBottom());
-            Log.d(TAG, "paddings: " + itemView.getPaddingRight() + ", " + itemView.getPaddingLeft());
-        }
-
-        public void setRightPadding(int padding) {
-            itemView.setPadding(itemView.getPaddingLeft(), itemView.getPaddingTop(),
-                    padding, itemView.getPaddingBottom());
+        public void setCardBackgroundColor(int itemPosition) {
+            taskCardView.setCardBackgroundColor(MATERIAL_COLORS[itemPosition % 16]);
         }
     }
 

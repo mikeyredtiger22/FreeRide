@@ -5,4 +5,25 @@
     <color name="colorAccent">#00c853</color>
     <color name="colorBlueDark">#002f98</color>
     <color name="colorGreenDark">#00aa41</color>
+
+
+<!-- Material 500 colors -->
+    <color name="taskCardColor1">#f44336</color>
+    <color name="taskCardColor2">#E91E63</color>
+    <color name="taskCardColor3">#9C27B0</color>
+    <color name="taskCardColor4">#673AB7</color>
+    <color name="taskCardColor5">#3F51B5</color>
+    <color name="taskCardColor6">#2196F3</color>
+    <color name="taskCardColor7">#03A9F4</color>
+    <color name="taskCardColor8">#00BCD4</color>
+    <color name="taskCardColor9">#009688</color>
+    <color name="taskCardColor10">#4CAF50</color>
+    <color name="taskCardColor11">#8BC34A</color>
+    <color name="taskCardColor12">#CDDC39</color>
+    <color name="taskCardColor13">#FFEB3B</color>
+    <color name="taskCardColor14">#FFC107</color>
+    <color name="taskCardColor15">#FF9800</color>
+    <color name="taskCardColor16">#FF5722</color>
+    <color name="taskCardColorSELECTED">@android:color/white</color>
+    <color name="taskCardColorSELECTED2">@android:color/black</color>
 </resources>

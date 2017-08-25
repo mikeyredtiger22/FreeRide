@@ -1,10 +1,8 @@
 package spikey.com.freeride.taskCardsMapView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -18,7 +16,6 @@ import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
 public class MapsActivity extends FragmentActivity {
-
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
@@ -37,13 +34,15 @@ public class MapsActivity extends FragmentActivity {
                 tasks = new Gson().fromJson(taskData, Task[].class);
             }
         }
+        int[] MATERIAL_COLORS = getMaterialColors();
+
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
         tasksRecyclerView.setHasFixedSize(true);
 
-        TaskLayoutManager layoutManager = new TaskLayoutManager(this, 50, tasksRecyclerView);
+        TaskLayoutManager layoutManager = new TaskLayoutManager(this, tasksRecyclerView);
         tasksRecyclerView.setLayoutManager(layoutManager);
 
-        TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks);
+        TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS);
         tasksRecyclerView.setAdapter(taskAdapter);
 
         PagerSnapHelper snapHelper = new PagerSnapHelper();
@@ -53,63 +52,37 @@ public class MapsActivity extends FragmentActivity {
         SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
 
         TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(
-                tasks, markersSwitch.isChecked(), getResources().getColor(R.color.colorBlueDark),
-                getResources().getColor(R.color.colorAccent));
+                tasks, markersSwitch.isChecked(), getResources(), MATERIAL_COLORS);
         tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
 
         markersSwitch.setOnCheckedChangeListener(taskIndicatorDecoration);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_view);
+        // Map notifies the task indicator decoration class when it is ready, the task indicator
+        // is then drawn on top.
         mapFragment.getMapAsync(taskIndicatorDecoration);
-
-//        int edgePadding = (int) (tasksRecyclerView.getMeasuredWidth() * 0.05);
-//        int lastPosition = tasksRecyclerView.getChildCount() - 1;
-//        //tasksRecyclerView.getChildAt(0).setPadding(edgePadding, 0, 0, 0);
-//        //tasksRecyclerView.getChildAt(lastPosition).setPadding(0, 0, edgePadding, 0);
-//        Log.d(TAG, "edge Padding: " + edgePadding);
-//        Log.d(TAG, "last Pos: " + lastPosition);
     }
 
-    public class TaskLayoutManager extends LinearLayoutManager {
-
-        private int parentWidth;
-        RecyclerView tasksRecyclerView;
-
-        public TaskLayoutManager(Context context, int parentWidth, RecyclerView tasksRecyclerView) {
-            super(context, LinearLayoutManager.HORIZONTAL, false);
-            this.parentWidth = parentWidth;
-            this.tasksRecyclerView = tasksRecyclerView;
-        }
-
-        public void setParentWidth(int parentWidth) {
-            this.parentWidth = parentWidth;
-        }
-
-        @Override
-        public int getPaddingLeft() {
-            //Used to center first and last item in recycler view.
-            //This method is called very little compared to item decoration
-            parentWidth = tasksRecyclerView.getMeasuredWidth();
-            int padding = (int) (parentWidth * 0.05);
-            Log.d(TAG, "LM RV width" + parentWidth);
-            return super.getPaddingLeft() + padding;// - Math.round((parentWidth - itemWidth) / 2);
-            //return Math.round(mParentWidth / 2f - mItemWidth / 2f);
-        }
-
-        @Override
-        public int getPaddingRight() {
-            parentWidth = tasksRecyclerView.getMeasuredWidth();
-            int padding = (int) (parentWidth * 0.05);
-            Log.d(TAG, "LM RV width" + parentWidth);
-            return super.getPaddingRight() + padding;
-        }
-
-        @Override
-        public int getPaddingTop() {
-            //Used
-            return super.getPaddingTop() + 50;
-        }
+    //todo put this somewhere else
+    public int[] getMaterialColors() {
+        int[] MATERIAL_COLORS = new int[16];
+        MATERIAL_COLORS[0] = getResources().getColor(R.color.taskCardColor1);
+        MATERIAL_COLORS[1] = getResources().getColor(R.color.taskCardColor2);
+        MATERIAL_COLORS[2] = getResources().getColor(R.color.taskCardColor3);
+        MATERIAL_COLORS[3] = getResources().getColor(R.color.taskCardColor4);
+        MATERIAL_COLORS[4] = getResources().getColor(R.color.taskCardColor5);
+        MATERIAL_COLORS[5] = getResources().getColor(R.color.taskCardColor6);
+        MATERIAL_COLORS[6] = getResources().getColor(R.color.taskCardColor7);
+        MATERIAL_COLORS[7] = getResources().getColor(R.color.taskCardColor8);
+        MATERIAL_COLORS[8] = getResources().getColor(R.color.taskCardColor9);
+        MATERIAL_COLORS[9] = getResources().getColor(R.color.taskCardColor10);
+        MATERIAL_COLORS[10] = getResources().getColor(R.color.taskCardColor11);
+        MATERIAL_COLORS[11] = getResources().getColor(R.color.taskCardColor12);
+        MATERIAL_COLORS[12] = getResources().getColor(R.color.taskCardColor13);
+        MATERIAL_COLORS[13] = getResources().getColor(R.color.taskCardColor14);
+        MATERIAL_COLORS[14] = getResources().getColor(R.color.taskCardColor15);
+        MATERIAL_COLORS[15] = getResources().getColor(R.color.taskCardColor16);
+        return MATERIAL_COLORS;
     }
 }
