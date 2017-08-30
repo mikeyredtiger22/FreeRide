@@ -1,9 +1,8 @@
 package spikey.com.freeride;
 
-import com.google.android.gms.maps.model.LatLng;
-
 public class Task {
 
+    private String taskId;
     private double startLocationLatitude;
     private double startLocationLongitude;
     private double endLocationLatitude;
@@ -16,10 +15,12 @@ public class Task {
     private String user;
     private double incentive;
 
-    public Task(double startLocationLatitude, double startLocationLongitude,
+    public Task(String taskId,
+                double startLocationLatitude, double startLocationLongitude,
                 double endLocationLatitude, double endLocationLongitude,
                 String creationLocalDateTime, String expirationLocalDateTime,
                 String title, String description, String state, String user, double incentive) {
+        this.taskId = taskId;
         this.startLocationLatitude = startLocationLatitude;
         this.startLocationLongitude = startLocationLongitude;
         this.endLocationLatitude = endLocationLatitude;
@@ -35,6 +36,14 @@ public class Task {
 
     public Task() {
 
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public double getStartLocationLatitude() {
@@ -124,12 +133,12 @@ public class Task {
     public void setIncentive(double incentive) {
         this.incentive = incentive;
     }
-
-    public LatLng getStartLatLng(){
-        return new LatLng(startLocationLatitude, startLocationLongitude);
-    }
-
-    public LatLng getEndLatLng(){
-        return new LatLng(endLocationLatitude, endLocationLongitude);
-    }
+//
+//    public LatLng getStartLatLng(){
+//        return new LatLng(startLocationLatitude, startLocationLongitude);
+//    }
+//
+//    public LatLng getEndLatLng(){
+//        return new LatLng(endLocationLatitude, endLocationLongitude);
+//    }
 }

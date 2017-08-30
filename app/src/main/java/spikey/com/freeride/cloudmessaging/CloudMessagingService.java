@@ -161,8 +161,7 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * @param taskId
      */
     private void secureTask(String taskId) {
-        String userId = FirebaseInstanceId.getInstance().getToken();
-        DatabaseOperations.secureTask(taskId, userId);
+        DatabaseOperations.secureTask(taskId);
     }
 
     /**

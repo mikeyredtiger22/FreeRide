@@ -49,13 +49,13 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
     private void draw(float startXPos, float width, int itemPosition) {
         paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
+        if (itemPosition == CURRENT_SELECTED_ITEM_POSITION) {
+            paint.setColor(BAR_SELECTED_COLOR);
+            //Cool shadow things
+        }
         draw(startXPos, width);
     }
 
-    private void draw(float startXPos, float width, boolean activeColor) {
-        paint.setColor((activeColor ? BAR_SELECTED_COLOR : BAR_DEFAULT_COLOR));
-        draw(startXPos, width);
-    }
 
     private void draw(float startXPos, float width) {
         //TODO use DP!
@@ -104,7 +104,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         // If layout manager doesn't return item position OR if there are no tasks to be displayed
         if (CURRENT_SELECTED_ITEM_POSITION >= 0) {
             float highlightStart = start + totalBarWidth * CURRENT_SELECTED_ITEM_POSITION;
-            draw(highlightStart, barDrawWidth, true);
+            //draw(highlightStart, barDrawWidth, true);
         }
     }
 
@@ -123,8 +123,16 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         }
         Task selectedTask = tasks[CURRENT_SELECTED_ITEM_POSITION];
         //todo set limit to title, add ellipses
-        LatLng startLatLng = selectedTask.getStartLatLng();
+//        LatLng startLatLng = selectedTask.getStartLatLng();
+        LatLng startLatLng = new LatLng(
+                selectedTask.getStartLocationLatitude(),
+                selectedTask.getStartLocationLongitude());
+        LatLng endLatLng = new LatLng(
+                selectedTask.getEndLocationLatitude(),
+                selectedTask.getEndLocationLongitude());
         googleMap.addMarker(new MarkerOptions().position(startLatLng).title(selectedTask.getTitle()));
+        googleMap.addMarker(new MarkerOptions().position(endLatLng).title("End"));
+//        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 10f));
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 10f));
         //todo use bounds with directions
     }

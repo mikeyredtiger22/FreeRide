@@ -12,6 +12,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
 
+import java.util.Arrays;
+
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
@@ -25,29 +27,35 @@ public class MapsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        Task[] tasks = null;
+        Task[] tasks;
         Intent intent = getIntent();
         if (intent.hasExtra("tasks")) {
-            String taskData = intent.getStringExtra("tasks");
-            if (taskData != null) {
-                Log.d("INTENT DATA", taskData);
-                tasks = new Gson().fromJson(taskData, Task[].class);
+            String allTaskDataString = intent.getStringExtra("tasks");
+            if (allTaskDataString != null) {
+                Log.d("INTENT DATA", allTaskDataString);
+                tasks = new Gson().fromJson(allTaskDataString, Task[].class);
+                Log.d(TAG, Arrays.toString(tasks));
+                setUpTaskCardsView(tasks);
             }
         }
+    }
+
+    private void setUpTaskCardsView(final Task[] tasks) {
+
+
         int[] MATERIAL_COLORS = getMaterialColors();
 
-        RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
+        final RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
         tasksRecyclerView.setHasFixedSize(true);
 
         TaskLayoutManager layoutManager = new TaskLayoutManager(this, tasksRecyclerView);
         tasksRecyclerView.setLayoutManager(layoutManager);
 
-        TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS);
+        final TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS);
         tasksRecyclerView.setAdapter(taskAdapter);
 
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(tasksRecyclerView);
-
 
         SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
 

@@ -18,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -62,16 +63,16 @@ public class DatabaseOperations {
      * Uses a transaction (concurrency safe).
      * transaction is recalled until the user field is set by a user.
      * @param taskId of task to secure
-     * @param userId of user
      */
-    public static void secureTask(final String taskId, final String userId) {
+    public static void secureTask(final String taskId) {
+        final String userId = FirebaseInstanceId.getInstance().getToken();
         if (!connectedToDatabase()) {
             return;
         }
 
         DatabaseReference newMessageRef = mDatabaseTasks.child(taskId);
         //newMessageRef.setValue("sfb");
-        Log.d(TAG, "Securing Task" + newMessageRef);
+        Log.d(TAG, "Securing Task " + newMessageRef);
 
         newMessageRef.runTransaction(new Transaction.Handler() {
             @Override
@@ -97,7 +98,7 @@ public class DatabaseOperations {
             public void onComplete(DatabaseError databaseError, boolean error,
                                    DataSnapshot dataSnapshot) {
                 if (error) {
-                    Log.d(TAG, "Task secured SUCCESSFULLY ");
+                    Log.d(TAG, "Transaction completed");
                 } else {
                     Log.d(TAG, "Error on securing task : " + databaseError);
                 }
@@ -114,21 +115,39 @@ public class DatabaseOperations {
         allTasksRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) { //TODO cleaner way? - use array
-                Log.d(TAG, "Get Available tasks: " + dataSnapshot.getValue());
+                String receivedData = dataSnapshot.getValue().toString();
+                Log.d(TAG, "Get Available tasks: " + receivedData);
+//                String allTasksDataMap = dataSnapshot.getValue().toString();
+//                if (allTasksDataMap.length() != 0) { //todo check actual empty size
+//                    resultsTextView.setText(allTasksDataMap);
+//                    Intent openTasksView = new Intent(context, MapsActivity.class);
+//                    openTasksView.putExtra("tasks", allTasksDataMap);
+//                    context.startActivity(openTasksView);
+
+
                 Gson gson = new Gson();
+                ArrayList<Object> tasksObjectArray = new ArrayList<>();
                 Iterator<DataSnapshot> tasksIterator = dataSnapshot.getChildren().iterator();
                 if (tasksIterator.hasNext()) {
-                    StringBuilder tasksDataStringBuilder = new StringBuilder("[");
-                    tasksDataStringBuilder.append(gson.toJson(tasksIterator.next().getValue()));
+                    tasksObjectArray.add(tasksIterator.next().getValue());
+
+//                    DataSnapshot taskData = tasksIterator.next();
+//                    String taskId = taskData.getKey();
+//                    StringBuilder tasksDataStringBuilder = new StringBuilder("[");
+//                    tasksDataStringBuilder.append(gson.toJson(tasksIterator.next()));
 
                     while (tasksIterator.hasNext()) {
-                        tasksDataStringBuilder.append(",")
-                                .append(gson.toJson(tasksIterator.next().getValue()));
+//                        tasksDataStringBuilder.append(",")
+//                                .append(gson.toJson(tasksIterator.next().getValue()));
+                        tasksObjectArray.add(tasksIterator.next().getValue());
                     }
-                    String tasksData = tasksDataStringBuilder.append("]").toString();
-                    resultsTextView.setText(tasksData);
+//                    String tasksData = taskData2; //tasksDataStringBuilder.append("]").toString();
+                    resultsTextView.setText(receivedData);
+                    Object[] tasks = tasksObjectArray.toArray();
+                    String tasksJson = gson.toJson(tasks);
                     Intent openTasksView = new Intent(context, MapsActivity.class);
-                    openTasksView.putExtra("tasks", tasksData);
+                    Log.d(TAG, "task Ob Array: " + tasksJson);
+                    openTasksView.putExtra("tasks", tasksJson);
                     context.startActivity(openTasksView);
                 } else {
                     // No task data received from server
@@ -199,7 +218,7 @@ public class DatabaseOperations {
     public static boolean connectedToDatabase() {
         DatabaseReference.goOnline();/////////////
         DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        connectedRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 connected = snapshot.getValue(Boolean.class);

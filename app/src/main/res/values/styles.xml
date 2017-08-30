@@ -21,4 +21,13 @@
         <!--android:maxLines can cause crashes with ellipses-->
     </style>
 
+    <style name="TaskCard">
+        <item name="android:singleLine">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:background">@null</item>
+    </style>
+
+
 </resources>
