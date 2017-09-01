@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
 
@@ -20,7 +19,6 @@ import spikey.com.freeride.Task;
 public class MapsActivity extends FragmentActivity {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
-    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -114,40 +114,26 @@ public class DatabaseOperations {
         DatabaseReference allTasksRef = mDatabaseTasks;
         allTasksRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) { //TODO cleaner way? - use array
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 String receivedData = dataSnapshot.getValue().toString();
                 Log.d(TAG, "Get Available tasks: " + receivedData);
-//                String allTasksDataMap = dataSnapshot.getValue().toString();
-//                if (allTasksDataMap.length() != 0) { //todo check actual empty size
-//                    resultsTextView.setText(allTasksDataMap);
-//                    Intent openTasksView = new Intent(context, MapsActivity.class);
-//                    openTasksView.putExtra("tasks", allTasksDataMap);
-//                    context.startActivity(openTasksView);
-
-
                 Gson gson = new Gson();
                 ArrayList<Object> tasksObjectArray = new ArrayList<>();
                 Iterator<DataSnapshot> tasksIterator = dataSnapshot.getChildren().iterator();
+
                 if (tasksIterator.hasNext()) {
                     tasksObjectArray.add(tasksIterator.next().getValue());
-
-//                    DataSnapshot taskData = tasksIterator.next();
-//                    String taskId = taskData.getKey();
-//                    StringBuilder tasksDataStringBuilder = new StringBuilder("[");
-//                    tasksDataStringBuilder.append(gson.toJson(tasksIterator.next()));
-
                     while (tasksIterator.hasNext()) {
-//                        tasksDataStringBuilder.append(",")
-//                                .append(gson.toJson(tasksIterator.next().getValue()));
                         tasksObjectArray.add(tasksIterator.next().getValue());
                     }
-//                    String tasksData = taskData2; //tasksDataStringBuilder.append("]").toString();
+
                     resultsTextView.setText(receivedData);
                     Object[] tasks = tasksObjectArray.toArray();
                     String tasksJson = gson.toJson(tasks);
                     Intent openTasksView = new Intent(context, MapsActivity.class);
                     Log.d(TAG, "task Ob Array: " + tasksJson);
                     openTasksView.putExtra("tasks", tasksJson);
+
                     context.startActivity(openTasksView);
                 } else {
                     // No task data received from server

@@ -21,6 +21,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".taskCardsMapView.MapsActivity"
+            android:label="@string/title_activity_maps">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="spikey.com.freeride.MainActivity" />
+        </activity>
+
         <service android:name=".cloudmessaging.CloudMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -42,14 +50,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
-        <activity
-            android:name=".taskCardsMapView.MapsActivity"
-            android:label="@string/title_activity_maps">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="spikey.com.freeride.MainActivity" />
-        </activity>
     </application>
 
 </manifest>
