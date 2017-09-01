@@ -8,6 +8,8 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
+import spikey.com.freeride.VALUES;
+
 public class SendMessageTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = SendMessageTask.class.getSimpleName();

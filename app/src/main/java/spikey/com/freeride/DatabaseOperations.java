@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
-import spikey.com.freeride.cloudmessaging.VALUES;
 import spikey.com.freeride.taskCardsMapView.MapsActivity;
 
 public class DatabaseOperations {

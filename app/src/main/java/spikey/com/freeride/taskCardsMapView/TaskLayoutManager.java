@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import spikey.com.freeride.VALUES;
+
 /**
  * Layout Manager padding works differently to setting the padding of the recycler view or its
  * items.
@@ -58,7 +60,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
      */
     @Override
     public int getPaddingTop() {
-        return super.getPaddingTop() + 30;
+        return super.getPaddingTop() + VALUES.TASK_CARDS_INDICATOR_HEIGHT_PX;
     }
 
     /**

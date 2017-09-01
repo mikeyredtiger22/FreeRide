@@ -40,7 +40,6 @@ public class MapsActivity extends FragmentActivity {
 
     private void setUpTaskCardsView(final Task[] tasks) {
 
-
         int[] MATERIAL_COLORS = getMaterialColors();
 
         final RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
@@ -55,22 +54,22 @@ public class MapsActivity extends FragmentActivity {
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(tasksRecyclerView);
 
-        SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
-
         TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(
-                tasks, markersSwitch.isChecked(), getResources(), MATERIAL_COLORS);
+                tasks, getResources().getColor(R.color.taskCardColorSELECTED), MATERIAL_COLORS);
         tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
 
+
+        SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
         markersSwitch.setOnCheckedChangeListener(taskIndicatorDecoration);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_view);
-        // Map notifies the task indicator decoration class when it is ready, the task indicator
-        // is then drawn on top.
+        // Map notifies the task indicator decoration class when it is ready,
+        // the task indicator is then drawn on top.
         mapFragment.getMapAsync(taskIndicatorDecoration);
+
     }
 
-    //todo put this somewhere else
     public int[] getMaterialColors() {
         int[] MATERIAL_COLORS = new int[16];
         MATERIAL_COLORS[0] = getResources().getColor(R.color.taskCardColor1);
