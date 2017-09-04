@@ -72,7 +72,7 @@
             android:layout_below="@id/task_distance"
             android:layout_above="@id/task_more_info_button"
             android:paddingStart="16dp"
-            tools:text="Incentive"/>
+            tools:text="Points"/>
 
 
 

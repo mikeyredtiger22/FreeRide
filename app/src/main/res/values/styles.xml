@@ -30,5 +30,11 @@
         <item name="colorAccent">@color/colorGreenDark</item>
     </style>
 
+    <style name="TaskDetails">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textViewStyle">@style/TextAppearance.AppCompat.Large</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
 
 </resources>

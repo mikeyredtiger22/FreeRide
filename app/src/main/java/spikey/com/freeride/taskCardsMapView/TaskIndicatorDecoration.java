@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.CompoundButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,21 +49,29 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     }
 
     private void draw(float startXPos, float width, int itemPosition) {
-        paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
+        //todo clean, hard to read, bar height and ypos change
         if (itemPosition == CURRENT_SELECTED_ITEM_POSITION) {
-            paint.setColor(BAR_SELECTED_COLOR);
-            //todo cool shadow things
+//            paint.setColor(BAR_SELECTED_COLOR);
+            paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
+            this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT * 2);
+
+            draw(startXPos, width, true);
+
+            this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
+        } else {
+            paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
+            draw(startXPos, width, false);
         }
-        draw(startXPos, width);
     }
 
 
-    private void draw(float startXPos, float width) {
+    private void draw(float startXPos, float width, boolean selected) {
         //TODO use DP!
         // int px = parent.getResources().getDisplayMetrics().density * dp;
         // or parent.getResources().getDimensionPixelSize(R.dimen.buttonHeight);
         // or Resources.getSystem().getDisplayMetrics().density
-        canvas.drawLine(startXPos, BAR_Y_POS, startXPos + width, BAR_Y_POS, paint);
+        int yPos = selected ? BAR_Y_POS * 2 : BAR_Y_POS;
+        canvas.drawLine(startXPos, yPos, startXPos + width, yPos, paint);
     }
 
     /**
@@ -112,7 +119,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.d(TAG, "MAP READY");
         this.googleMap = googleMap;
         // Application needs to show Google logo, terms of service for Google Maps API
         // padding: left, top, right, bottom, top is to show all of marker if at top of screen
@@ -122,7 +128,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     }
 
     private void updateMap() {
-        Log.d(TAG, "UPDATE MAP");
         if (tasks.length == 0) {
             return;
         }

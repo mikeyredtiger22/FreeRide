@@ -36,7 +36,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     /**
      * TThis decreases the width of the cards slightly. It also centers the first and
      * last card letting the user see the edges of cards either side of the centre card.
-     * @return new Padding
+     * @return new Padding (pixels)
      */
     @Override
     public int getPaddingLeft() {
@@ -46,7 +46,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     /**
      * This decreases the width of the cards slightly. It also centers the first and
      * last card letting the user see the edges of cards either side of the centre card.
-     * @return new Padding
+     * @return new Padding (pixels)
      */
     @Override
     public int getPaddingRight() {
@@ -56,7 +56,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     /**
      * This decreases the height of the cards slightly. It also lowers the card by the
      * same amount. This is used so the task indicator can be drawn above the cards.
-     * @return new Padding
+     * @return new Padding (pixels)
      */
     @Override
     public int getPaddingTop() {
@@ -67,7 +67,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
      * This calculates the padding for each edge of the recycler view. I want the cards to be
      * 0.9 * parent width, so I add a padding of 0.05 * parent width to each side.
      * todo how it affects cards and such. not the same as recycler view padding
-     * @return padding for each edge
+     * @return padding (pixels) for each edge
      */
     private int getEdgePadding() {
         if (edgePadding <= 0) {

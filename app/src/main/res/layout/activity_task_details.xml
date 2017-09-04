@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context="spikey.com.freeride.taskCardsMapView.TaskDetailsActivity"
+    android:theme="@style/TaskDetails">
+
+
+    <TextView
+        android:id="@+id/task_details_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:paddingTop="8dp"
+        android:paddingStart="16dp"
+        android:text="Title " />
+    <TextView
+        android:id="@+id/task_details_title_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_title"
+        android:layout_alignBaseline="@id/task_details_title"
+        android:textSize="18sp"
+        tools:text="Task_title" />
+
+
+    <TextView
+        android:id="@+id/task_details_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_title"
+        android:layout_toLeftOf="@id/task_more_info_icon_button"
+        android:paddingStart="16dp"
+        android:text="Description " />
+    <TextView
+        android:id="@+id/task_details_desc_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_desc"
+        android:layout_alignBaseline="@id/task_details_desc"
+        android:textSize="18sp"
+        tools:text="Task_desc" />
+
+
+    <TextView
+        android:id="@+id/task_details_incentive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_desc"
+        android:paddingStart="16dp"
+        android:text="Points " />
+    <TextView
+        android:id="@+id/task_details_incentive_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_incentive"
+        android:layout_alignBaseline="@id/task_details_incentive"
+        android:textSize="18sp"
+        tools:text="Task_incentive" />
+
+
+    <TextView
+        android:id="@+id/task_details_start_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_incentive"
+        android:paddingStart="16dp"
+        android:text="Start Location " />
+    <TextView
+        android:id="@+id/task_details_start_location_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_start_location"
+        android:layout_alignBaseline="@id/task_details_start_location"
+        android:textSize="18sp"
+        tools:text="Task_start_loc" />
+
+
+    <TextView
+        android:id="@+id/task_details_end_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_start_location"
+        android:paddingStart="16dp"
+        android:text="End Location " />
+    <TextView
+        android:id="@+id/task_details_end_location_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_end_location"
+        android:layout_alignBaseline="@id/task_details_end_location"
+        android:textSize="18sp"
+        tools:text="Task_end_loc" />
+
+
+    <TextView
+        android:id="@+id/task_details_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_end_location"
+        android:paddingStart="16dp"
+        android:text="Time " />
+    <TextView
+        android:id="@+id/task_details_time_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_time"
+        android:layout_alignBaseline="@id/task_details_time"
+        android:textSize="18sp"
+        tools:text="Task_time" />
+
+
+    <TextView
+        android:id="@+id/task_details_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_time"
+        android:paddingStart="16dp"
+        android:text="Distance " />
+    <TextView
+        android:id="@+id/task_details_distance_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/task_details_distance"
+        android:layout_alignBaseline="@id/task_details_distance"
+        android:textSize="18sp"
+        tools:text="Task_distance" />
+
+
+    <TextView
+        android:id="@+id/task_details_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/task_details_distance"
+        android:paddingStart="16dp"
+        android:text="Color " />
+
+    <View
+        android:id="@+id/task_details_color_block"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/task_details_color"
+        android:layout_alignBottom="@id/task_details_color"
+        android:layout_margin="0dp"
+        android:background="@color/colorAccent"/>
+
+</RelativeLayout>
