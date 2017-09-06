@@ -11,8 +11,6 @@ import android.util.Log;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
 
-import java.util.Arrays;
-
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
@@ -32,9 +30,8 @@ public class MapsActivity extends FragmentActivity {
         if (intent.hasExtra("tasks")) {
             String allTaskDataString = intent.getStringExtra("tasks");
             if (allTaskDataString != null) {
-                Log.d("INTENT DATA", allTaskDataString);
+                Log.d(TAG, "OnCreate Intent Data: " + allTaskDataString);
                 tasks = new Gson().fromJson(allTaskDataString, Task[].class);
-                Log.d(TAG, Arrays.toString(tasks));
                 setUpTaskCardsView(tasks);
             }
         }
@@ -57,8 +54,8 @@ public class MapsActivity extends FragmentActivity {
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(tasksRecyclerView);
 
-        TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(
-                tasks, getResources().getColor(R.color.taskCardColorSELECTED), MATERIAL_COLORS);
+        TaskIndicatorDecoration taskIndicatorDecoration =
+                new TaskIndicatorDecoration(this, tasks, MATERIAL_COLORS);
         tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
 
 
