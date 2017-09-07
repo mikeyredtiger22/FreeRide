@@ -2,156 +2,77 @@ package spikey.com.freeride.directions;
 
 
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.LatLng;
+import com.google.maps.model.TravelMode;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.util.concurrent.TimeUnit;
 
 import spikey.com.freeride.VALUES;
 
 
-public class DirectionsLoader extends AsyncTask<Void, Void, ArrayList<LatLng>> {
+public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
     private static final String TAG = DirectionsLoader.class.getSimpleName();
 
-    private DirectionsResult callback;
-    private int loaderId;
+    private static final GeoApiContext GEO_API_CONTEXT = getGeoContext();
+
+    private DirectionsCallback callback;
+    private int taskPosition;
     private LatLng start;
     private LatLng end;
 
-    public DirectionsLoader(DirectionsResult callback, int loaderId, LatLng start, LatLng end) {
+    public DirectionsLoader(DirectionsCallback callback, int taskPosition,
+                            double startLat, double startLon, double endLat, double endLon) {
         this.callback = callback;
-        this.loaderId = loaderId;
-        this.start = start;
-        this.end = end;
+        this.taskPosition = taskPosition;
+        this.start = new LatLng(startLat, startLon);
+        this.end = new LatLng(endLat, endLon);
     }
 
-    public interface DirectionsResult {
-        void receiveDirectionsResult(ArrayList<LatLng> points, int loaderId);
-    }
-
-    /**
-     ************************************************************************************
-     ************************************************************************************
-     * @param voids no inputs
-     * @return points
-     */
-    @Override
-    protected ArrayList<LatLng> doInBackground(Void... voids) {
-
-        String directionsUrl = getDirectionsUrl(start, end);
-
-        String response = downloadUrl(directionsUrl);
-
-        Log.d(TAG, "Loader Id: " + loaderId + " received response"); //: " + response);
-
-        return routeDataToPoints(response);
-
+    public interface DirectionsCallback {
+        void receiveDirectionsResult(DirectionsRoute route, int taskPosition);
     }
 
     @Override
-    protected void onPostExecute(ArrayList<LatLng> response) {
-        callback.receiveDirectionsResult(response, loaderId);
-    }
+    protected DirectionsRoute doInBackground(Void... voids) {
 
-    private String getDirectionsUrl(LatLng start, LatLng end) {
-
-        String startString = "origin=" + start.latitude + "," + start.longitude;
-        String endString = "destination=" + end.latitude + "," + end.longitude;
-
-        //TODO add no alternative routes option
-        //todo configure other parameters
-        // Sensor enabled
-        String sensor = "sensor=false";
-        String mode = "mode=driving"; //todo can change for user
-        String key = "key=" + VALUES.DIRECTIONS_API_KEY;
-        // Building the parameters to the web service
-        String parameters = startString + "&" + endString + "&" + sensor + "&" + mode + "&" + key;
-
-        // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/json?" + parameters;
-
-        return url;
-    }
-
-    private String downloadUrl(String strUrl) {
-        String data = "";
-        InputStream iStream = null;
-        HttpsURLConnection urlConnection = null;
-        try {
-            URL url = new URL(strUrl);
-            urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.connect();
-
-            iStream = urlConnection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
-            StringBuilder response = new StringBuilder();
-
-            String line = "";
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-
-            data = response.toString();
-            reader.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (iStream != null) {
-                    iStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-        return data;
-    }
-
-    private ArrayList<LatLng> routeDataToPoints(String response) {
-
-        ArrayList<LatLng> points = new ArrayList<>();
+        DirectionsRoute route = null;
 
         try {
-            JSONObject jObject = new JSONObject(response);
-            JsonParser parser = new JsonParser();
-            List<List<HashMap<String, String>>> routes = parser.parse(jObject);
+            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+                    .mode(TravelMode.DRIVING)
+                    .alternatives(false)
+                    .origin(start)
+                    .destination(end)
+                    .await();
 
-            if (routes.isEmpty()) {
-                Log.d(TAG, "Directions result is empty");
-                return points;
+            if (result.routes.length > 0) {
+                route = result.routes[0];
             }
-
-            List<HashMap<String, String>> path = routes.get(0);
-            for (int j = 0; j < path.size(); j++) {
-
-                HashMap<String, String> point = path.get(j);
-                double lat = Double.parseDouble(point.get("lat"));
-                double lng = Double.parseDouble(point.get("lng"));
-                LatLng position = new LatLng(lat, lng);
-                points.add(position);
-            }
-
-        } catch (JSONException e) {
+        } catch (ApiException | InterruptedException | IOException e) {
             e.printStackTrace();
         }
+        return route;
+    }
 
-        return points;
+    @Override
+    protected void onPostExecute(DirectionsRoute route) {
+        callback.receiveDirectionsResult(route, taskPosition);
+    }
+
+    private static GeoApiContext getGeoContext() {
+        GeoApiContext geoApiContext = new GeoApiContext();
+        return geoApiContext
+                .setQueryRateLimit(25)
+                .setApiKey(VALUES.DIRECTIONS_API_KEY)
+                .setConnectTimeout(3, TimeUnit.SECONDS)
+                .setReadTimeout(3, TimeUnit.SECONDS)
+                .setWriteTimeout(3, TimeUnit.SECONDS);
     }
 }

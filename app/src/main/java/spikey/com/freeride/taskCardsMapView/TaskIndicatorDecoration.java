@@ -28,21 +28,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.PolyUtil;
-import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import spikey.com.freeride.Task;
 import spikey.com.freeride.VALUES;
 import spikey.com.freeride.directions.DirectionsLoader;
-import spikey.com.freeride.directions.DirectionsLoader2;
+import spikey.com.freeride.directions.DirectionsLoader.DirectionsCallback;
 
 public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         implements OnMapReadyCallback, CompoundButton.OnCheckedChangeListener,
         OnSuccessListener<Location>, ActivityCompat.OnRequestPermissionsResultCallback,
-        DirectionsLoader.DirectionsResult{
+        DirectionsCallback {
 
     private static final String TAG = TaskIndicatorDecoration.class.getSimpleName();
 
@@ -59,7 +57,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
     private final Context context;
     private final Task[] tasks;
-    private List<LatLng>[] taskDirections;
+    private DirectionsRoute[] taskDirectionsRoute;
 
     private boolean showAllMarkers;
     private GoogleMap googleMap;
@@ -73,15 +71,17 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         this.context = context;
         this.location = LocationServices.getFusedLocationProviderClient(context);
         this.tasks = tasks;
-        this.taskDirections = (ArrayList<LatLng>[]) new ArrayList[tasks.length];
+        this.taskDirectionsRoute = new DirectionsRoute[tasks.length];
         this.paint = new Paint();
         this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.TASK_CARDS_LAYOUT_HEIGHT = 802; //todo
 
-        for (int i=tasks.length - 1; i>= 0; i--) {
+        //testing how long it tasked until first is loaded and displayed
+        for (int i=0; i<tasks.length; i++) {
             loadTaskDirections(i);
         }
+
     }
 
     private void draw(float startXPos, float width, int itemPosition) {
@@ -135,7 +135,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         boolean change = setSelectedItemPosition(layoutManager.findFirstCompletelyVisibleItemPosition());
         // The map should not update while the user is scrolling
         if (change) {
-//            loadTaskAndNeighbourDirections();
             updateMap();
         }
         drawBars(xPos, itemCount, barDrawWidth, barDrawGap);
@@ -250,62 +249,25 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     }
 
     private void loadTaskDirections(int taskPosition) {
-//        Log.d(TAG, "loading task" + taskPosition);
-        if (taskDirections[taskPosition] != null) {
-            return;
-        }
+
         Task selectedTask = tasks[taskPosition];
-        LatLng startLatLng = new LatLng(
+
+        DirectionsLoader loader = new DirectionsLoader(this, taskPosition,
                 selectedTask.getStartLocationLatitude(),
-                selectedTask.getStartLocationLongitude());
-        LatLng endLatLng = new LatLng(
+                selectedTask.getStartLocationLongitude(),
                 selectedTask.getEndLocationLatitude(),
                 selectedTask.getEndLocationLongitude());
-
-/*        Log.d(TAG, "Adding loader for task: " + taskPosition);
-        DirectionsLoader loader = new DirectionsLoader(
-                this, taskPosition, startLatLng, endLatLng);
         loader.execute();
-        Log.d(TAG, "Started loader for task: " + taskPosition);*/
 
-        DirectionsLoader2 loader = new DirectionsLoader2();
-        DirectionsResult results = loader.getDirections(startLatLng, endLatLng);
-        Log.d(TAG, taskPosition + " result routes: " + Arrays.toString(results.routes));
-        if (results.routes.length == 0) {
-            Log.d(TAG, "noice tho");
-            return;
-        }
-        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        Log.d(TAG, taskPosition + " decoded poly: " + decodedPath);
-        taskDirections[taskPosition] = decodedPath;
-
-        if (taskPosition == CURRENT_SELECTED_ITEM_POSITION && googleMap != null) {
-            addCurrentTaskDirectionsToMap();
-        }
     }
 
     @Override
-    public void receiveDirectionsResult(ArrayList<LatLng> points, int loaderId) {
+    public void receiveDirectionsResult(DirectionsRoute route, int taskPosition) {
 
-        //Each task takes about 1 seconds to receive directions
-        if (points == null) {
-            Log.d(TAG, "Received empty directions");
-            return;
-        }
-
-        //Cancel if directions already loaded.
-        if (taskDirections[loaderId] != null) {
-            Log.d(TAG, "Task Directions already loaded");
-            Log.d(TAG, "Prev task directions: " + taskDirections[loaderId]);
-            Log.d(TAG, "New task directions: " + points);
-            return;
-        }
-
-        taskDirections[loaderId] = points;
-        Log.d(TAG, "LOADED TASK DIRECTIONS: " + loaderId);
+        taskDirectionsRoute[taskPosition] = route;
 
         //Directions are for current task on screen, add directly to map
-        if (CURRENT_SELECTED_ITEM_POSITION == loaderId) {
+        if (CURRENT_SELECTED_ITEM_POSITION == taskPosition) {
             addCurrentTaskDirectionsToMap();
         }
 
@@ -317,11 +279,12 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
             return;
         }
 
-        if (taskDirections[CURRENT_SELECTED_ITEM_POSITION] == null) {
-            Log.d(TAG, "Directions not loaded yet");
+        DirectionsRoute taskRoute = taskDirectionsRoute[CURRENT_SELECTED_ITEM_POSITION];
+        if (taskRoute == null) {
+            Log.d(TAG, "Directions not loaded.");
             return;
         }
-        List<LatLng> points = taskDirections[CURRENT_SELECTED_ITEM_POSITION];
+        List<LatLng> points = PolyUtil.decode(taskRoute.overviewPolyline.getEncodedPath());
 
         if (points != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
@@ -331,7 +294,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
             polylineOptions.addAll(points);
             polylineOptions.width(15);
             polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
-            polylineOptions.geodesic(true);
             googleMap.addPolyline(polylineOptions);
         }
     }
