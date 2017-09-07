@@ -42,12 +42,23 @@ public class DirectionsLoader extends AsyncTask<Void, Void, ArrayList<LatLng>> {
         void receiveDirectionsResult(ArrayList<LatLng> points, int loaderId);
     }
 
+    /**
+     ************************************************************************************
+     ************************************************************************************
+     * @param voids no inputs
+     * @return points
+     */
     @Override
     protected ArrayList<LatLng> doInBackground(Void... voids) {
+
         String directionsUrl = getDirectionsUrl(start, end);
+
         String response = downloadUrl(directionsUrl);
+
         Log.d(TAG, "Loader Id: " + loaderId + " received response"); //: " + response);
+
         return routeDataToPoints(response);
+
     }
 
     @Override

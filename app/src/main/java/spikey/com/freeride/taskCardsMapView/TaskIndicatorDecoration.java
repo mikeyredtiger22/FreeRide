@@ -27,12 +27,17 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.model.DirectionsResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import spikey.com.freeride.Task;
 import spikey.com.freeride.VALUES;
 import spikey.com.freeride.directions.DirectionsLoader;
+import spikey.com.freeride.directions.DirectionsLoader2;
 
 public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         implements OnMapReadyCallback, CompoundButton.OnCheckedChangeListener,
@@ -54,7 +59,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
     private final Context context;
     private final Task[] tasks;
-    private ArrayList<LatLng>[] taskDirections;
+    private List<LatLng>[] taskDirections;
 
     private boolean showAllMarkers;
     private GoogleMap googleMap;
@@ -74,7 +79,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.TASK_CARDS_LAYOUT_HEIGHT = 802; //todo
 
-        for (int i=0; i<tasks.length; i++) {
+        for (int i=tasks.length - 1; i>= 0; i--) {
             loadTaskDirections(i);
         }
     }
@@ -257,11 +262,26 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
                 selectedTask.getEndLocationLatitude(),
                 selectedTask.getEndLocationLongitude());
 
-//        Log.d(TAG, "Adding loader for task: " + taskPosition);
+/*        Log.d(TAG, "Adding loader for task: " + taskPosition);
         DirectionsLoader loader = new DirectionsLoader(
                 this, taskPosition, startLatLng, endLatLng);
         loader.execute();
-//        Log.d(TAG, "Started loader for task: " + taskPosition);
+        Log.d(TAG, "Started loader for task: " + taskPosition);*/
+
+        DirectionsLoader2 loader = new DirectionsLoader2();
+        DirectionsResult results = loader.getDirections(startLatLng, endLatLng);
+        Log.d(TAG, taskPosition + " result routes: " + Arrays.toString(results.routes));
+        if (results.routes.length == 0) {
+            Log.d(TAG, "noice tho");
+            return;
+        }
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        Log.d(TAG, taskPosition + " decoded poly: " + decodedPath);
+        taskDirections[taskPosition] = decodedPath;
+
+        if (taskPosition == CURRENT_SELECTED_ITEM_POSITION && googleMap != null) {
+            addCurrentTaskDirectionsToMap();
+        }
     }
 
     @Override
@@ -301,17 +321,19 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
             Log.d(TAG, "Directions not loaded yet");
             return;
         }
-        ArrayList<LatLng> points = taskDirections[CURRENT_SELECTED_ITEM_POSITION];
+        List<LatLng> points = taskDirections[CURRENT_SELECTED_ITEM_POSITION];
 
-        PolylineOptions polylineOptions = new PolylineOptions();
+        if (points != null) {
+            PolylineOptions polylineOptions = new PolylineOptions();
 
-        //todo configure
+            //todo configure
 
-        polylineOptions.addAll(points);
-        polylineOptions.width(15);
-        polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
-        polylineOptions.geodesic(true);
-        googleMap.addPolyline(polylineOptions);
+            polylineOptions.addAll(points);
+            polylineOptions.width(15);
+            polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
+            polylineOptions.geodesic(true);
+            googleMap.addPolyline(polylineOptions);
+        }
     }
 
     /**

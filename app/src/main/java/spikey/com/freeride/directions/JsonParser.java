@@ -45,6 +45,7 @@ public class JsonParser {
                     for(int k=0;k<jSteps.length();k++){
                         String polyline = "";
                         polyline = (String)((JSONObject)((JSONObject)jSteps.get(k)).get("polyline")).get("points");
+                        //More info at: routes/legs/ such as distance, duration...
                         List list = decodePoly(polyline);
 
                             /* Traversing all points */
