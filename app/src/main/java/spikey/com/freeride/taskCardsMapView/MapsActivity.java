@@ -101,23 +101,6 @@ public class MapsActivity extends FragmentActivity {
         return CREATED_COLORS;
     }
 
-    public int[] createColors(int amount) {
-        int[] CREATED_COLORS = new int[amount];
-
-        float hue = 0.0f;
-        float sat = 0.5f;
-        float lum = 0.55f;
-        float[] hsl = {hue, sat, lum};
-        for (int i=0; i<amount; i++) {
-            float newHue = (360f / amount) * i;
-            hsl[0] = newHue;
-            int col = ColorUtils.HSLToColor(hsl);
-            CREATED_COLORS[i] = col;
-        }
-
-        return CREATED_COLORS;
-    }
-
     public int[] getMaterialColors() {
         int[] MATERIAL_COLORS = new int[16];
         MATERIAL_COLORS[0] = getResources().getColor(R.color.taskCardColor1);
