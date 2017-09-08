@@ -34,7 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_title"
-        android:layout_toLeftOf="@id/task_more_info_icon_button"
         android:paddingStart="16dp"
         android:text="Description " />
     <TextView

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.model.DirectionsRoute;
@@ -288,10 +290,14 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
         if (points != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
-
-            //todo configure
-
             polylineOptions.addAll(points);
+            polylineOptions.startCap(new RoundCap());
+            polylineOptions.endCap(new RoundCap());
+
+            polylineOptions.width(25);
+            polylineOptions.color(Color.BLACK);
+            googleMap.addPolyline(polylineOptions);
+
             polylineOptions.width(15);
             polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
             googleMap.addPolyline(polylineOptions);

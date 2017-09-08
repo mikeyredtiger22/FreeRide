@@ -3,6 +3,7 @@ package spikey.com.freeride.taskCardsMapView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -40,6 +41,7 @@ public class MapsActivity extends FragmentActivity {
     private void setUpTaskCardsView(final Task[] tasks) {
 
         int[] MATERIAL_COLORS = getMyMaterialColors();
+//        int[] CREATED_COLORS = createColors(tasks.length);
 
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
         tasksRecyclerView.setHasFixedSize(true);
@@ -68,6 +70,23 @@ public class MapsActivity extends FragmentActivity {
         // the task indicator is then drawn on top.
         mapFragment.getMapAsync(taskIndicatorDecoration);
 
+    }
+
+    public int[] createColors(int amount) {
+        int[] CREATED_COLORS = new int[amount];
+
+        float hue = 0.0f;
+        float sat = 0.5f;
+        float lum = 0.55f;
+        float[] hsl = {hue, sat, lum};
+        for (int i=0; i<amount; i++) {
+            float newHue = (360f / amount) * i;
+            hsl[0] = newHue;
+            int col = ColorUtils.HSLToColor(hsl);
+            CREATED_COLORS[i] = col;
+        }
+
+        return CREATED_COLORS;
     }
 
     public int[] getMaterialColors() {

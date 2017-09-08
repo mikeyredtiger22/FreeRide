@@ -21,6 +21,7 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
     private static final String TAG = DirectionsLoader.class.getSimpleName();
 
     private static final GeoApiContext GEO_API_CONTEXT = getGeoContext();
+    private  final GeoApiContext CONTEXT = getGeoContext();
 
     private DirectionsCallback callback;
     private int taskPosition;
@@ -45,7 +46,7 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
         DirectionsRoute route = null;
 
         try {
-            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+            DirectionsResult result = DirectionsApi.newRequest(GEO_API_CONTEXT)
                     .mode(TravelMode.DRIVING)
                     .alternatives(false)
                     .origin(start)
