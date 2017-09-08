@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -26,23 +25,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.maps.android.PolyUtil;
 import com.google.maps.model.DirectionsRoute;
-
-import java.util.List;
 
 import spikey.com.freeride.Task;
 import spikey.com.freeride.VALUES;
-import spikey.com.freeride.directions.DirectionsLoader;
-import spikey.com.freeride.directions.DirectionsLoader.DirectionsCallback;
 
 public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         implements OnMapReadyCallback, CompoundButton.OnCheckedChangeListener,
-        OnSuccessListener<Location>, ActivityCompat.OnRequestPermissionsResultCallback,
-        DirectionsCallback {
+        OnSuccessListener<Location>, ActivityCompat.OnRequestPermissionsResultCallback{
 
     private static final String TAG = TaskIndicatorDecoration.class.getSimpleName();
 
@@ -78,11 +69,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.TASK_CARDS_LAYOUT_HEIGHT = 802; //todo
-
-        //Pre-loads direction data for all tasks asynchronously
-        for (int i=0; i<tasks.length; i++) {
-            loadTaskDirections(i);
-        }
 
     }
 
@@ -174,8 +160,6 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
         location.getLastLocation().addOnSuccessListener(this);
 
-//        DirectionsApi
-
         updateMap();
     }
 
@@ -200,7 +184,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         googleMap.addMarker(new MarkerOptions()
                 .position(endLatLng).icon(coloredMarker).title("End"));
 
-        addCurrentTaskDirectionsToMap();
+//        addCurrentTaskDirectionsToMap();
 
         LatLngBounds markerBounds = LatLngBounds.builder()
                 .include(startLatLng).include(endLatLng).build();
@@ -234,7 +218,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     /**
      * todo This one will require a lot of explaining
      * todo use if many tasks?
-     */
+     *
     private void loadTaskAndNeighbourDirections() {
         final int position = CURRENT_SELECTED_ITEM_POSITION;
 //        Log.d(TAG, "loading neighbours" + position);
@@ -247,16 +231,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         }
     }
 
-    private void loadTaskDirections(int taskPosition) {
 
-        Task selectedTask = tasks[taskPosition];
-
-        DirectionsLoader loader = new DirectionsLoader(this, taskPosition,
-                selectedTask.getStartLat(), selectedTask.getStartLong(),
-                selectedTask.getEndLat(), selectedTask.getEndLong());
-        loader.execute();
-
-    }
 
     @Override
     public void receiveDirectionsResult(DirectionsRoute route, int taskPosition) {
@@ -297,7 +272,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
             polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
             googleMap.addPolyline(polylineOptions);
         }
-    }
+    }*/
 
     /**
      * Show all markers switch listener

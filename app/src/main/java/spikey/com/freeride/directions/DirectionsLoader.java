@@ -22,21 +22,28 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
 
     private static final GeoApiContext GEO_API_CONTEXT = getGeoContext();
 
-    private DirectionsCallback callback;
+    private TaskRouteDataLoadedCallback routeDataLoadedListener;
+    private TaskPathLoadedCallback pathLoadedListener;
     private int taskPosition;
     private LatLng start;
     private LatLng end;
 
-    public DirectionsLoader(DirectionsCallback callback, int taskPosition,
+    public DirectionsLoader(TaskRouteDataLoadedCallback routeDataLoadedListener,
+                            TaskPathLoadedCallback pathLoadedListener, int taskPosition,
                             double startLat, double startLon, double endLat, double endLon) {
-        this.callback = callback;
+        this.routeDataLoadedListener = routeDataLoadedListener;
+        this.pathLoadedListener = pathLoadedListener;
         this.taskPosition = taskPosition;
         this.start = new LatLng(startLat, startLon);
         this.end = new LatLng(endLat, endLon);
     }
 
-    public interface DirectionsCallback {
-        void receiveDirectionsResult(DirectionsRoute route, int taskPosition);
+    public interface TaskRouteDataLoadedCallback {
+        void onRouteDataLoaded(DirectionsRoute route, int taskPosition);
+    }
+
+    public interface TaskPathLoadedCallback {
+        void onPathLoaded(DirectionsRoute route, int taskPosition);
     }
 
     @Override
@@ -63,7 +70,8 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
 
     @Override
     protected void onPostExecute(DirectionsRoute route) {
-        callback.receiveDirectionsResult(route, taskPosition);
+        routeDataLoadedListener.onRouteDataLoaded(route, taskPosition);
+        //pathLoadedListener.onPathLoaded(route, taskPosition);
     }
 
     /**

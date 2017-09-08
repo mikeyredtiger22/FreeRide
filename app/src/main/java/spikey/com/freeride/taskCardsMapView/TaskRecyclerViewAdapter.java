@@ -10,24 +10,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.maps.model.DirectionsRoute;
 
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
+import spikey.com.freeride.directions.DirectionsLoader;
 
-public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder> {
+public class TaskRecyclerViewAdapter
+        extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder>
+        implements DirectionsLoader.TaskRouteDataLoadedCallback {
 
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
     private Task[] tasks;
+    private DirectionsRoute[] taskRouteData;
     private int[] MATERIAL_COLORS;
     private Context context;
 
     public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS, Context context) {
         super();
         this.tasks = tasks;
+        taskRouteData = new DirectionsRoute[tasks.length];
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
     }
@@ -41,11 +48,15 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     @Override
     public void onBindViewHolder(TaskViewHolder holder, int position) {
         final Task task = tasks[position];
+
+        DirectionsRoute taskRoute;
+        if ((taskRoute = taskRouteData[position]) != null) {
+            holder.taskStartLocText .setText(taskRoute.legs[0].startAddress);
+            holder.taskEndLocText   .setText(taskRoute.legs[0].endAddress);
+            holder.loadingIcon.setVisibility(View.INVISIBLE);
+        }
         //todo strings to resources when UI finalised
         final int color = holder.setCardBackgroundColor(position);
-        holder.taskStartLocText .setText("Start: ");
-        holder.taskEndLocText   .setText("End: ");
-        holder.taskDurationText .setText("Time: ");
         holder.taskIncentiveText.setText(String.format("Points: %s", task.getIncentive()));
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
@@ -67,6 +78,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         holder.taskMoreInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO only after directions data received
                 Intent openTaskDetails = new Intent(context, TaskDetailsActivity.class);
                 Log.d(TAG, "Opening task details");
                 openTaskDetails.putExtra("task", new Gson().toJson(task));
@@ -81,6 +93,14 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         return tasks.length;
     }
 
+
+    //DIRECTIONS CALLBACK
+    @Override
+    public void onRouteDataLoaded(DirectionsRoute route, int taskPosition) {
+        taskRouteData[taskPosition] = route;
+        //TODO reload this task if binded to task card
+    }
+
     class TaskViewHolder extends RecyclerView.ViewHolder {
 
         CardView taskCardView;
@@ -91,6 +111,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         Button taskAcceptButton;
         Button taskDismissButton;
         Button taskMoreInfoButton;
+        ProgressBar loadingIcon;
 
         public TaskViewHolder(View itemView) {
             super(itemView);
@@ -103,6 +124,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
             taskAcceptButton = itemView.findViewById(R.id.task_accept_button);
             taskDismissButton = itemView.findViewById(R.id.task_dismiss_button);
             taskMoreInfoButton = itemView.findViewById(R.id.task_more_info_button);
+            loadingIcon = itemView.findViewById(R.id.task_loading_icon);
         }
 
         public int setCardBackgroundColor(int itemPosition) {

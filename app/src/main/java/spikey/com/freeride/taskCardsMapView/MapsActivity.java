@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
+import spikey.com.freeride.directions.DirectionsLoader;
 
 import static android.view.View.LAYER_TYPE_SOFTWARE;
 
@@ -70,17 +71,15 @@ public class MapsActivity extends FragmentActivity {
         // the task indicator is then drawn on top.
         mapFragment.getMapAsync(taskIndicatorDecoration);
 
-        tasksRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                Log.d(TAG, "SCROLL STATE: " + newState);
-            }
+        for (int taskPosition=0; taskPosition<tasks.length; taskPosition++) {
+            Task selectedTask = tasks[taskPosition];
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-
-            }
-        });
+            DirectionsLoader loader = new DirectionsLoader(taskAdapter, null/*todo new Map UI class*/,
+                    taskPosition,
+                    selectedTask.getStartLat(), selectedTask.getStartLong(),
+                    selectedTask.getEndLat(), selectedTask.getEndLong());
+            loader.execute();
+        }
 
     }
 
