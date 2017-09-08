@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.model.DirectionsRoute;
@@ -77,7 +79,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.TASK_CARDS_LAYOUT_HEIGHT = 802; //todo
 
-        //testing how long it tasked until first is loaded and displayed
+        //Pre-loads direction data for all tasks asynchronously
         for (int i=0; i<tasks.length; i++) {
             loadTaskDirections(i);
         }
@@ -188,19 +190,15 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
         Task selectedTask = tasks[CURRENT_SELECTED_ITEM_POSITION];
         //todo set limit to title, add ellipses
-        LatLng startLatLng = new LatLng(
-                selectedTask.getStartLocationLatitude(),
-                selectedTask.getStartLocationLongitude());
-        LatLng endLatLng = new LatLng(
-                selectedTask.getEndLocationLatitude(),
-                selectedTask.getEndLocationLongitude());
+        LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
+        LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
 
-        BitmapDescriptor markerIcon = getMarkerColor();
+        BitmapDescriptor coloredMarker = getColoredMarker();
 
-        googleMap.addMarker(new MarkerOptions().position(startLatLng)
-                .title(selectedTask.getTitle()).icon(markerIcon));
-        googleMap.addMarker(new MarkerOptions().position(endLatLng)
-                .title("End").icon(markerIcon));
+        googleMap.addMarker(new MarkerOptions()
+                .position(startLatLng).icon(coloredMarker).title(selectedTask.getTitle()));
+        googleMap.addMarker(new MarkerOptions()
+                .position(endLatLng).icon(coloredMarker).title("End"));
 
         addCurrentTaskDirectionsToMap();
 
@@ -209,7 +207,7 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
     }
 
-    private BitmapDescriptor getMarkerColor(){
+    private BitmapDescriptor getColoredMarker(){
         float[] hsv = new float[3];
         int col = MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16];
         ColorUtils.colorToHSL(col, hsv);
@@ -234,7 +232,8 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     }
 
     /**
-     * TODO This one will require a lot of explaining
+     * todo This one will require a lot of explaining
+     * todo use if many tasks?
      */
     private void loadTaskAndNeighbourDirections() {
         final int position = CURRENT_SELECTED_ITEM_POSITION;
@@ -253,10 +252,8 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
         Task selectedTask = tasks[taskPosition];
 
         DirectionsLoader loader = new DirectionsLoader(this, taskPosition,
-                selectedTask.getStartLocationLatitude(),
-                selectedTask.getStartLocationLongitude(),
-                selectedTask.getEndLocationLatitude(),
-                selectedTask.getEndLocationLongitude());
+                selectedTask.getStartLat(), selectedTask.getStartLong(),
+                selectedTask.getEndLat(), selectedTask.getEndLong());
         loader.execute();
 
     }
@@ -281,17 +278,21 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
         DirectionsRoute taskRoute = taskDirectionsRoute[CURRENT_SELECTED_ITEM_POSITION];
         if (taskRoute == null) {
-            Log.d(TAG, "Directions not loaded.");
+            Log.d(TAG, "Selected task directions not loaded.");
             return;
         }
         List<LatLng> points = PolyUtil.decode(taskRoute.overviewPolyline.getEncodedPath());
 
         if (points != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
-
-            //todo configure
-
             polylineOptions.addAll(points);
+            polylineOptions.startCap(new RoundCap());
+            polylineOptions.endCap(new RoundCap());
+
+            polylineOptions.width(25);
+            polylineOptions.color(Color.BLACK);
+            googleMap.addPolyline(polylineOptions);
+
             polylineOptions.width(15);
             polylineOptions.color(MATERIAL_COLORS[CURRENT_SELECTED_ITEM_POSITION % 16]);
             googleMap.addPolyline(polylineOptions);

@@ -1,5 +1,6 @@
 package spikey.com.freeride.cloudmessaging;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -18,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import spikey.com.freeride.DatabaseOperations;
-import spikey.com.freeride.taskCardsMapView.MapsActivity;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
+import spikey.com.freeride.taskCardsMapView.MapsActivity;
 
 
 public class CloudMessagingService extends FirebaseMessagingService {
@@ -110,6 +111,7 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * @param reputationScore
      * @param messageId
      */
+    @Deprecated
     public void replyToNewTaskMessage(String locationScore, String reputationScore, String messageId) {
 
         Map<String, String> dataPayload = new HashMap<>();
@@ -165,10 +167,11 @@ public class CloudMessagingService extends FirebaseMessagingService {
     }
 
     /**
-     * Display a notification to the user
-     * @param notification to display
+     * Create notification from data given from server
+     * @param notificationData from server
+     * @param taskData from server
      */
-    private void createNotification(RemoteMessage.Notification notification, String taskData) {
+    private void createNotification(RemoteMessage.Notification notificationData, String taskData) {
         //TODO customise notification, add intent to open task details
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("task", taskData);
@@ -177,19 +180,20 @@ public class CloudMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri notificationSoundURI = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder mNotificationBuilder = new NotificationCompat.Builder(this)
+        Notification notification = new NotificationCompat.Builder(this)
                 //todo newer Building - learn notification channels
                 .setSmallIcon(R.drawable.ic_stat_name)
-                .setContentTitle(notification.getTitle()) //use default values if null
-                .setContentText(notification.getBody())
+                .setContentTitle(notificationData.getTitle()) //use default values if null
+                .setContentText(notificationData.getBody())
                 .setAutoCancel(true)
-                .setSound(notificationSoundURI);
+                .setSound(notificationSoundURI)
+                .build();
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (notificationManager != null) {
-            notificationManager.notify(0, mNotificationBuilder.build());
+            notificationManager.notify(0, notification);
         }
     }
 

@@ -25,8 +25,8 @@ public class TaskLayoutManager extends LinearLayoutManager {
 
     private static final String TAG = TaskLayoutManager.class.getSimpleName();
 
-    private int edgePadding;
-    RecyclerView tasksRecyclerView;
+    private Integer edgePadding;
+    private RecyclerView tasksRecyclerView;
 
     public TaskLayoutManager(Context context, RecyclerView tasksRecyclerView) {
         super(context, LinearLayoutManager.HORIZONTAL, false);
@@ -34,7 +34,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     }
 
     /**
-     * TThis decreases the width of the cards slightly. It also centers the first and
+     * TThis decreases the width of the cards slightly. It also centres the first and
      * last card letting the user see the edges of cards either side of the centre card.
      * @return new Padding (pixels)
      */
@@ -44,7 +44,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     }
 
     /**
-     * This decreases the width of the cards slightly. It also centers the first and
+     * This decreases the width of the cards slightly. It also centres the first and
      * last card letting the user see the edges of cards either side of the centre card.
      * @return new Padding (pixels)
      */
@@ -70,7 +70,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
      * @return padding (pixels) for each edge
      */
     private int getEdgePadding() {
-        if (edgePadding <= 0) {
+        if (edgePadding == null) {
             edgePadding = (int) (tasksRecyclerView.getWidth() * 0.05);
         }
         return edgePadding;

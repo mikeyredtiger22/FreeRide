@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,7 +28,6 @@ public class TaskDetailsActivity extends AppCompatActivity {
             taskColor = intent.getIntExtra("color", 0);
             String taskData = intent.getStringExtra("task");
             if (taskData != null) {
-                Log.d("INTENT DATA", taskData);
                 this.task = new Gson().fromJson(taskData, Task.class);
             }
         }
@@ -38,10 +36,9 @@ public class TaskDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-//            actionBar.setTitle("Task Detailswww");
         }
 
-//        getWindow().getDecorView().setBackgroundColor(taskColor);
+        //getWindow().getDecorView().setBackgroundColor(taskColor);
         setTaskInfo();
     }
 
@@ -55,13 +52,13 @@ public class TaskDetailsActivity extends AppCompatActivity {
         TextView distance = findViewById(R.id.task_details_distance_info);
         View colorBlock = findViewById(R.id.task_details_color_block);
 
-        title        .setText(String.format(task.getTitle()));
-        desc         .setText(String.format(""));
-        incentive    .setText(String.format(String.valueOf(task.getIncentive())));
-        startLocation.setText(String.format(task.getStartLocationLatitude() + ", " + task.getStartLocationLongitude()));
-        endLocation  .setText(String.format(task.getEndLocationLatitude() + ", " + task.getEndLocationLongitude()));
-        time         .setText(String.format(task.getCreationLocalDateTime()));
-        distance     .setText(String.format(""));
+        title        .setText(task.getTitle());
+        desc         .setText("");
+        incentive    .setText(String.valueOf(task.getIncentive()));
+        startLocation.setText(String.format("%s, %s", task.getStartLat(), task.getStartLong()));
+        endLocation  .setText(String.format("%s, %s", task.getEndLat(), task.getEndLong()));
+        time         .setText(task.getCreationLocalDateTime());
+        distance     .setText("");
         colorBlock.setBackgroundColor(taskColor);
 
     }

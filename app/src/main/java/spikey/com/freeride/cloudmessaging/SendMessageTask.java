@@ -30,7 +30,6 @@ public class SendMessageTask extends AsyncTask<Void, Void, Void> {
         RemoteMessage message = new RemoteMessage.Builder(fcmProjectSenderId + "@gcm.googleapis.com")
                 .setMessageId(messageId)
                 .setData(dataPayload)
-                //.setTtl(0)
                 .build();
         fm.send(message);
         Log.d(TAG, "Message READY to be sent, with data: " + dataPayload);

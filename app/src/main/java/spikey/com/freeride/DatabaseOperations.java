@@ -1,11 +1,7 @@
 package spikey.com.freeride;
 
 
-import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -16,17 +12,15 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import org.joda.time.LocalDateTime;
+
 import java.util.Map;
-
-import spikey.com.freeride.taskCardsMapView.MapsActivity;
 
 public class DatabaseOperations {
 
     private static final String TAG = DatabaseOperations.class.getSimpleName();
+
     private static boolean connected;
     private static final DatabaseReference mDatabaseUserTaskMessages =
             FirebaseDatabase.getInstance().getReference(VALUES.DB_MESSAGES_PATH);
@@ -43,7 +37,7 @@ public class DatabaseOperations {
         if (!connectedToDatabase()) {
             return;
         }
-        Log.d(TAG, "Adding User task Info to database for task: " + taskId);
+        Log.d(TAG, "Sending User Task Info to database for task: " + taskId);
         DatabaseReference newMessageRef = mDatabaseUserTaskMessages.child(taskId).push();
         newMessageRef.setValue(dataPayload, new DatabaseReference.CompletionListener() {
             @Override
@@ -70,8 +64,7 @@ public class DatabaseOperations {
         }
 
         DatabaseReference newMessageRef = mDatabaseTasks.child(taskId);
-        //newMessageRef.setValue("sfb");
-        Log.d(TAG, "Securing Task " + newMessageRef);
+        Log.d(TAG, "Securing Task: " + taskId);
 
         newMessageRef.runTransaction(new Transaction.Handler() {
             @Override
@@ -108,43 +101,10 @@ public class DatabaseOperations {
     /**
      * Returns all available tasks from database as Json tree / string??
      */
-    public static void getAvailableTasks(final TextView resultsTextView, final Context context) {
+    public static void getAvailableTasks(ValueEventListener getAvailableTasksListener) {
         connectedToDatabase();
         DatabaseReference allTasksRef = mDatabaseTasks;
-        allTasksRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String receivedData = dataSnapshot.getValue().toString();
-                Log.d(TAG, "Get Available tasks: " + receivedData);
-                Gson gson = new Gson();
-                ArrayList<Object> tasksObjectArray = new ArrayList<>();
-                Iterator<DataSnapshot> tasksIterator = dataSnapshot.getChildren().iterator();
-
-                if (tasksIterator.hasNext()) {
-                    tasksObjectArray.add(tasksIterator.next().getValue());
-                    while (tasksIterator.hasNext()) {
-                        tasksObjectArray.add(tasksIterator.next().getValue());
-                    }
-
-                    resultsTextView.setText(receivedData);
-                    Object[] tasks = tasksObjectArray.toArray();
-                    String tasksJson = gson.toJson(tasks);
-                    Intent openTasksView = new Intent(context, MapsActivity.class);
-                    Log.d(TAG, "task Ob Array: " + tasksJson);
-                    openTasksView.putExtra("tasks", tasksJson);
-
-                    context.startActivity(openTasksView);
-                } else {
-                    // No task data received from server
-                    Toast.makeText(context, "No Tasks Available.", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "OnCancelled: " + databaseError);
-            }
-        });
+        allTasksRef.addListenerForSingleValueEvent(getAvailableTasksListener);
     }
 
     /**
@@ -152,12 +112,12 @@ public class DatabaseOperations {
      */
     public static void databaseMessageTest() {
         connectedToDatabase();
-        DatabaseReference databaseReff = FirebaseDatabase.getInstance().getReference().child("ConnectTest").push();
-        String userId = FirebaseInstanceId.getInstance().getToken(); //test..
-        Object o = userId;
-        databaseReff.setValue(o);
-        Log.d(TAG, "DB TEST: " + databaseReff);
-
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance()
+                .getReference().child("ConnectTest").push();
+        String userId = FirebaseInstanceId.getInstance().getToken();
+        databaseRef.child("userId").setValue(userId);
+        databaseRef.child("time").setValue(LocalDateTime.now().toString());
+        Log.d(TAG, "DB TEST: " + databaseRef);
     }
 
     /**

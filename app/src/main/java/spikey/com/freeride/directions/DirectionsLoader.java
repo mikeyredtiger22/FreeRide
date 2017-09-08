@@ -45,7 +45,7 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
         DirectionsRoute route = null;
 
         try {
-            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+            DirectionsResult result = DirectionsApi.newRequest(GEO_API_CONTEXT)
                     .mode(TravelMode.DRIVING)
                     .alternatives(false)
                     .origin(start)
@@ -66,6 +66,10 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
         callback.receiveDirectionsResult(route, taskPosition);
     }
 
+    /**
+     * Should only be called once
+     * @return Api Context for app to use google directions api
+     */
     private static GeoApiContext getGeoContext() {
         GeoApiContext geoApiContext = new GeoApiContext();
         return geoApiContext
