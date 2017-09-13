@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-import spikey.com.freeride.taskCardsMapView.MapsActivity;
+import spikey.com.freeride.taskCardsMapView.TasksAndMapActivity;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity{
 
             Object[] tasks = tasksObjectArray.toArray();
             String tasksJson = gson.toJson(tasks);
-            Intent openTasksView = new Intent(context, MapsActivity.class);
+            Intent openTasksView = new Intent(context, TasksAndMapActivity.class);
             openTasksView.putExtra("tasks", tasksJson);
             context.startActivity(openTasksView);
         }

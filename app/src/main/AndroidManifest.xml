@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".taskCardsMapView.MapsActivity"
+            android:name=".taskCardsMapView.TasksAndMapActivity"
             android:label="@string/title_activity_maps"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
@@ -31,7 +31,7 @@
         <activity
             android:name=".taskCardsMapView.TaskDetailsActivity"
             android:label="Task Details"
-            android:parentActivityName=".taskCardsMapView.MapsActivity"
+            android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
             android:screenOrientation="portrait">
         </activity>
 

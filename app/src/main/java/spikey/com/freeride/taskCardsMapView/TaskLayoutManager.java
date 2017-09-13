@@ -34,7 +34,7 @@ public class TaskLayoutManager extends LinearLayoutManager {
     }
 
     /**
-     * TThis decreases the width of the cards slightly. It also centres the first and
+     * This decreases the width of the cards slightly. It also centres the first and
      * last card letting the user see the edges of cards either side of the centre card.
      * @return new Padding (pixels)
      */

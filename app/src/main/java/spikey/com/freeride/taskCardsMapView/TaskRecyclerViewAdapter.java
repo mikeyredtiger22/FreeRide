@@ -28,6 +28,7 @@ public class TaskRecyclerViewAdapter
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
     private Task[] tasks;
     private DirectionsRoute[] taskRouteData;
+    private boolean[] taskRouteLoaded;
     private int[] MATERIAL_COLORS;
     private Context context;
 
@@ -35,6 +36,7 @@ public class TaskRecyclerViewAdapter
         super();
         this.tasks = tasks;
         taskRouteData = new DirectionsRoute[tasks.length];
+        taskRouteLoaded = new boolean[tasks.length]; //automatically sets all elements to false
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
     }
@@ -50,10 +52,16 @@ public class TaskRecyclerViewAdapter
         final Task task = tasks[position];
 
         DirectionsRoute taskRoute;
-        if ((taskRoute = taskRouteData[position]) != null) {
-            holder.taskStartLocText .setText(taskRoute.legs[0].startAddress);
-            holder.taskEndLocText   .setText(taskRoute.legs[0].endAddress);
+        if (taskRouteLoaded[position]) {
+            //Task directions have been loaded
             holder.loadingIcon.setVisibility(View.INVISIBLE);
+            if ((taskRoute = taskRouteData[position]) != null) {
+                holder.taskStartLocText.setText(taskRoute.legs[0].startAddress);
+                holder.taskEndLocText.setText(taskRoute.legs[0].endAddress);
+            } else {
+                //No directions returned from loader
+                holder.taskStartLocText.setText(R.string.no_directions_loaded);
+            }
         }
         //todo strings to resources when UI finalised
         final int color = holder.setCardBackgroundColor(position);
@@ -98,7 +106,8 @@ public class TaskRecyclerViewAdapter
     @Override
     public void onRouteDataLoaded(DirectionsRoute route, int taskPosition) {
         taskRouteData[taskPosition] = route;
-        //TODO reload this task if binded to task card
+        taskRouteLoaded[taskPosition] = true;
+        notifyItemChanged(taskPosition);
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {

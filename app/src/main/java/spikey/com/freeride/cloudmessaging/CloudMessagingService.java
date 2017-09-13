@@ -21,7 +21,7 @@ import java.util.Map;
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
-import spikey.com.freeride.taskCardsMapView.MapsActivity;
+import spikey.com.freeride.taskCardsMapView.TasksAndMapActivity;
 
 
 public class CloudMessagingService extends FirebaseMessagingService {
@@ -173,7 +173,7 @@ public class CloudMessagingService extends FirebaseMessagingService {
      */
     private void createNotification(RemoteMessage.Notification notificationData, String taskData) {
         //TODO customise notification, add intent to open task details
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(this, TasksAndMapActivity.class);
         intent.putExtra("task", taskData);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent resultIntent = PendingIntent.getActivity(this , 0, intent,

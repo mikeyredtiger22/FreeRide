@@ -71,7 +71,7 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
     @Override
     protected void onPostExecute(DirectionsRoute route) {
         routeDataLoadedListener.onRouteDataLoaded(route, taskPosition);
-        //pathLoadedListener.onPathLoaded(route, taskPosition);
+        pathLoadedListener.onPathLoaded(route, taskPosition);
     }
 
     /**
