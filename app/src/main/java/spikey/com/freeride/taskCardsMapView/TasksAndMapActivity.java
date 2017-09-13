@@ -16,8 +16,6 @@ import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 import spikey.com.freeride.directions.DirectionsLoader;
 
-import static android.view.View.LAYER_TYPE_SOFTWARE;
-
 public class TasksAndMapActivity extends FragmentActivity {
 
     private static final String TAG = TasksAndMapActivity.class.getSimpleName();
@@ -41,42 +39,26 @@ public class TasksAndMapActivity extends FragmentActivity {
 
     private void setUpTaskCardsView(final Task[] tasks) {
 
+        //Colors
         int[] MATERIAL_COLORS = getMyMaterialColors();
-//        int[] CREATED_COLORS = createColors(tasks.length);
 
+
+        //Set up recycler view (and adapter)
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
-        tasksRecyclerView.setHasFixedSize(true);
-        tasksRecyclerView.setLayerType(LAYER_TYPE_SOFTWARE, null);
-
-        TaskScrollListener taskScrollListener = new TaskScrollListener();
-        tasksRecyclerView.addOnScrollListener(taskScrollListener);
-
-        TaskLayoutManager layoutManager = new TaskLayoutManager(this, tasksRecyclerView);
-        tasksRecyclerView.setLayoutManager(layoutManager);
-
+        tasksRecyclerView.setHasFixedSize(true); //will change when cards can be added/removed
+//        tasksRecyclerView.setLayerType(LAYER_TYPE_SOFTWARE, null);
         TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this);
         tasksRecyclerView.setAdapter(taskAdapter);
 
-        PagerSnapHelper snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(tasksRecyclerView);
 
-        TaskIndicatorDecoration taskIndicatorDecoration =
-                new TaskIndicatorDecoration(MATERIAL_COLORS);
-        tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
-        taskScrollListener.addFocusedTaskListener(taskIndicatorDecoration);
-
-        MapView mapView = new MapView(this, tasks, MATERIAL_COLORS);
-        taskScrollListener.addFocusedTaskListener(mapView);
-
-        SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
-        markersSwitch.setOnCheckedChangeListener(mapView);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map_view);
-        // Map notifies the task indicator decoration class when it is ready,
-        // the task indicator is then drawn on top.
+        //Set up map view todo takes a while to start activity
+        MapView mapView = new MapView(this, tasks, MATERIAL_COLORS, tasksRecyclerView);
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(mapView);
 
+
+        //Initiate task directions loading
         for (int taskPosition=0; taskPosition<tasks.length; taskPosition++) {
             Task selectedTask = tasks[taskPosition];
 
@@ -88,6 +70,30 @@ public class TasksAndMapActivity extends FragmentActivity {
         }
 
 
+        //Start calculations for task indicator drawing
+        float screenWidth = getResources().getDisplayMetrics().widthPixels;
+        float screenDensity = getResources().getDisplayMetrics().density;
+        TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(MATERIAL_COLORS,
+                tasks.length, screenWidth, screenDensity);
+        tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
+
+
+        //Setup scroll listener and focused task listeners
+        TaskScrollListener taskScrollListener = new TaskScrollListener(tasks.length);
+        tasksRecyclerView.addOnScrollListener(taskScrollListener);
+        taskScrollListener.addFocusedTaskListener(mapView);
+        taskScrollListener.addFocusedTaskListener(taskIndicatorDecoration);
+
+
+        //Other helper classes
+        TaskLayoutManager layoutManager = new TaskLayoutManager(this, tasksRecyclerView);
+        tasksRecyclerView.setLayoutManager(layoutManager);
+
+        PagerSnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(tasksRecyclerView);
+
+        SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
+        markersSwitch.setOnCheckedChangeListener(mapView);
 
     }
 

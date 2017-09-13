@@ -10,10 +10,13 @@ public class TaskScrollListener extends RecyclerView.OnScrollListener {
 
     private static final String TAG = TaskScrollListener.class.getSimpleName();
 
+    private final int LAST_TASK_INDEX;
     private int focusedTaskPosition;
     private ArrayList<FocusedTaskListener> focusedTaskListeners;
 
-    public TaskScrollListener() {
+
+    public TaskScrollListener(int taskCount) {
+        this.LAST_TASK_INDEX = taskCount - 1;
         focusedTaskListeners = new ArrayList<>();
     }
 
@@ -27,17 +30,30 @@ public class TaskScrollListener extends RecyclerView.OnScrollListener {
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+
         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
             int newFocusedTaskPosition = getFocusedTaskPosition(recyclerView);
-            Log.d(TAG, "SCROLL: " + newFocusedTaskPosition + ", " + this.focusedTaskPosition);
             if (newFocusedTaskPosition != this.focusedTaskPosition) {
-                //position changed
-                this.focusedTaskPosition = newFocusedTaskPosition;
-                //notify all listeners
-                for (FocusedTaskListener listener : focusedTaskListeners) {
-                    listener.focusedTaskChange(newFocusedTaskPosition);
+                setNewPositionAndNotifyListeners(newFocusedTaskPosition);
+            }
+        } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+            //Sometimes state doesn't reach idle when scrolling to first or last item
+            int newFocusedTaskPosition = getFocusedTaskPosition(recyclerView);
+            Log.d(TAG, "IDLE  NEW:" + newFocusedTaskPosition + "  OLD:" + focusedTaskPosition);
+            if (newFocusedTaskPosition != this.focusedTaskPosition) {
+                if (newFocusedTaskPosition == 0) {
+                    setNewPositionAndNotifyListeners(newFocusedTaskPosition);
+                } else if (newFocusedTaskPosition == LAST_TASK_INDEX) {
+                    setNewPositionAndNotifyListeners(newFocusedTaskPosition);
                 }
             }
+        }
+    }
+
+    private void setNewPositionAndNotifyListeners(int newFocusedTaskPosition) {
+        this.focusedTaskPosition = newFocusedTaskPosition;
+        for (FocusedTaskListener listener : focusedTaskListeners) {
+            listener.focusedTaskChange(newFocusedTaskPosition);
         }
     }
 

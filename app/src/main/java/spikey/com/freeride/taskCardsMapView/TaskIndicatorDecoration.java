@@ -3,6 +3,7 @@ package spikey.com.freeride.taskCardsMapView;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import spikey.com.freeride.VALUES;
 
@@ -15,47 +16,56 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     private static final int BAR_Y_POS = (BAR_HEIGHT_DEFAULT / 2);
 
     private final int[] MATERIAL_COLORS;
+    private final int taskCount;
+
+    private float drawXStartPos;
+    private float drawTotalBarWidth;
+    private float drawBarWidth;
+    private float drawBarGap;
+    private float newHeight;
 
     private Paint paint;
     private Canvas canvas;
 
     private int FOCUSED_TASK_POS;
 
-    public TaskIndicatorDecoration(int[] MATERIAL_COLORS) {
+    public TaskIndicatorDecoration(int[] MATERIAL_COLORS, int taskCount,
+                                   float screenWidth, float screenDensity) {
         this.paint = new Paint();
-        this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
+        this.newHeight = screenDensity * 5;
+        Log.d(TAG, "new height px: " + newHeight);
+//        this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
+        this.paint.setStrokeWidth(newHeight);
+
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.FOCUSED_TASK_POS = 0;
+        this.taskCount = taskCount;
+        calculate(screenWidth, screenDensity);
+        //todo use dp for ypos
+    }
+
+    private void calculate(float screenWidth, float screenDensity) {
+        //Align start of indicators with start of text on card
+        float cardLayoutPadding = screenWidth * 0.05f; // card padding from layout manager
+        float cardTextPadding = 16 * screenDensity; // text padding from card layout
+        float indicatorPadding = cardLayoutPadding + cardTextPadding;
+
+        float totalUseableSpace = screenWidth - (indicatorPadding * 2);
+        float toalBarWidth = totalUseableSpace / taskCount;
+//        float barDrawWidth = Math.min(400, toalBarWidth * 0.9f); todo and test
+        float barWidth = toalBarWidth * 0.9f;
+        float xStartPos = indicatorPadding + (barWidth * 0.05f);
+
+        this.drawXStartPos = xStartPos;
+        this.drawTotalBarWidth = toalBarWidth;
+        this.drawBarWidth = barWidth;
+
+
     }
 
     @Override
     public void focusedTaskChange(int focusedTaskPosition) {
         this.FOCUSED_TASK_POS = focusedTaskPosition;
-    }
-
-    private void draw(float startXPos, float width, int itemPosition) {
-        //todo clean, hard to read, bar height and ypos change
-        if (itemPosition == FOCUSED_TASK_POS) {
-            paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
-            this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT * 2);
-
-            draw(startXPos, width, true);
-
-            this.paint.setStrokeWidth(BAR_HEIGHT_DEFAULT);
-        } else {
-            paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
-            draw(startXPos, width, false);
-        }
-    }
-
-
-    private void draw(float startXPos, float width, boolean selected) {
-        //TODO use DP!
-        // int px = parent.getResources().getDisplayMetrics().density * dp;
-        // or parent.getResources().getDimensionPixelSize(R.dimen.buttonHeight);
-        // or Resources.getSystem().getDisplayMetrics().density
-        int yPos = selected ? BAR_Y_POS * 2 : BAR_Y_POS;
-        canvas.drawLine(startXPos, yPos, startXPos + width, yPos, paint);
     }
 
     /**
@@ -67,31 +77,16 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
     @Override
     public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
         super.onDrawOver(canvas, parent, state);
-        //todo way to save drawing, only redraw/calculate if change in selected card?
+        //todo way to save drawing?
         this.canvas = canvas;
-        int itemCount = parent.getAdapter().getItemCount();
-        float layoutPadding = 0; //parent.getWidth() * 0.05f;
-        int cardPadding = 150; //todo - 16dp (task card padding)
-        float totalUseableSpace = parent.getWidth() - ((layoutPadding + cardPadding) * 2);
-        float toalBarWidth = totalUseableSpace / itemCount;
-//        float barDrawWidth = Math.min(400, toalBarWidth * 0.9f);
-        float barDrawWidth = toalBarWidth * 0.9f;
-        float barDrawGap = toalBarWidth * 0.1f;
-        float xPos = layoutPadding + cardPadding + (barDrawGap * 0.5f);
 
-
-        drawBars(xPos, itemCount, barDrawWidth, barDrawGap);
-
-        //todo item on click listener to re-centre google camera
-    }
-
-    private void drawBars(float xPos, int itemCount, float barDrawWidth, float barDrawGap) {
-
-        final float totalBarWidth = barDrawWidth + barDrawGap;
-
-        for (int itemPosition = 0; itemPosition < itemCount; itemPosition++) {
-            draw(xPos, barDrawWidth, itemPosition); //todo deprecated, add theme?
-            xPos += totalBarWidth;
+        float drawXPos = drawXStartPos;
+        for (int itemPosition = 0; itemPosition < taskCount; itemPosition++) {
+            paint.setColor(MATERIAL_COLORS[itemPosition % 16]);
+            float height = (itemPosition == FOCUSED_TASK_POS) ? newHeight * 2 : newHeight;
+            canvas.drawRect(drawXPos, 0, drawXPos + drawBarWidth, height, paint);
+            drawXPos += drawTotalBarWidth;
         }
+        //todo item on click listener to re-centre google camera
     }
 }

@@ -8,6 +8,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.graphics.ColorUtils;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.Toast;
@@ -50,25 +51,24 @@ public class MapView implements
     private final FusedLocationProviderClient location;
 
     private final int[] MATERIAL_COLORS;
-    private final int TASK_CARDS_LAYOUT_HEIGHT;
 
     private final Context context;
+    private final RecyclerView recyclerView; //only used to get recycler view height at runtime
     private final Task[] tasks;
-    private DirectionsRoute[] taskDirectionsRoute;
 
+    private DirectionsRoute[] taskDirectionsRoute;
     private boolean showAllMarkers;
     private GoogleMap googleMap;
-
     private int FOCUSED_TASK_POS;
 
 
-    public MapView(Context context, Task[] tasks, int[] MATERIAL_COLORS) {
+    public MapView(Context context, Task[] tasks, int[] MATERIAL_COLORS, RecyclerView recyclerView) {
         this.context = context;
         this.location = LocationServices.getFusedLocationProviderClient(context);
         this.tasks = tasks;
         this.taskDirectionsRoute = new DirectionsRoute[tasks.length];
         this.MATERIAL_COLORS = MATERIAL_COLORS;
-        this.TASK_CARDS_LAYOUT_HEIGHT = 802; //todo
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class MapView implements
         // Application needs to show Google logo, terms of service for Google Maps API
         // padding: left, top, right, bottom, top is to show all of marker if at top of screen
         // bottom is because of the task cards at the bottom
-        googleMap.setPadding(0, MAP_TOP_PADDING, 0, TASK_CARDS_LAYOUT_HEIGHT);
+        googleMap.setPadding(0, MAP_TOP_PADDING, 0, recyclerView.getHeight());
 
 
         if (ActivityCompat.checkSelfPermission(context,

@@ -26,9 +26,9 @@
     <color name="taskCardColor16">#FF5722</color>
     <color name="taskCardColorSELECTED">@android:color/white</color>
     <color name="taskCardColorSELECTED2">@android:color/black</color>
-    
-    
-<!-- Material 500 colors -->
+
+
+<!-- My Material colors -->
     <color name="myTaskCardColor1">#e63a2e</color>
     <color name="myTaskCardColor2">#e62e6b</color>
     <color name="myTaskCardColor3">#ca2ee6</color>
@@ -48,7 +48,7 @@
     <color name="myTaskCardColorSELECTED">@android:color/white</color>
     <color name="myTaskCardColorSELECTED2">@android:color/black</color>
 
-    <!-- Material 700 colors -->
+<!-- Material 700 colors -->
     <color name="taskCardColorDark1">#d32f2f</color>
     <color name="taskCardColorDark2">#C2185B</color>
     <color name="taskCardColorDark3">#7B1FA2</color>
@@ -66,7 +66,7 @@
     <color name="taskCardColorDark15">#F57C00</color>
     <color name="taskCardColorDark16">#E64A19</color>
 
-    <!-- Material 300 colors -->
+ <!-- Material 300 colors -->
     <color name="taskCardColorLight1">#e57373</color>
     <color name="taskCardColorLight2">#F06292</color>
     <color name="taskCardColorLight3">#BA68C8</color>
