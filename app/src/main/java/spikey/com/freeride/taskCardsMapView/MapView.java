@@ -15,19 +15,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.PolyUtil;
-import com.google.maps.model.DirectionsRoute;
 
 import java.util.List;
 
@@ -56,7 +52,7 @@ public class MapView implements
     private final RecyclerView recyclerView; //only used to get recycler view height at runtime
     private final Task[] tasks;
 
-    private DirectionsRoute[] taskDirectionsRoute;
+    private String[] taskEncodedPaths;
     private boolean showAllMarkers;
     private GoogleMap googleMap;
     private int FOCUSED_TASK_POS;
@@ -66,7 +62,7 @@ public class MapView implements
         this.context = context;
         this.location = LocationServices.getFusedLocationProviderClient(context);
         this.tasks = tasks;
-        this.taskDirectionsRoute = new DirectionsRoute[tasks.length];
+        this.taskEncodedPaths = new String[tasks.length];
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.recyclerView = recyclerView;
     }
@@ -117,16 +113,16 @@ public class MapView implements
 
         BitmapDescriptor coloredMarker = getColoredMarker();
 
-        googleMap.addMarker(new MarkerOptions()
-                .position(startLatLng).icon(coloredMarker).title(selectedTask.getTitle()));
-        googleMap.addMarker(new MarkerOptions()
-                .position(endLatLng).icon(coloredMarker).title("End"));
+//        googleMap.addMarker(new MarkerOptions()
+//                .position(startLatLng).icon(coloredMarker).title(selectedTask.getTitle()));
+//        googleMap.addMarker(new MarkerOptions()
+//                .position(endLatLng).icon(coloredMarker).title("End"));
 
         addCurrentTaskDirectionsToMap();
 
-        LatLngBounds markerBounds = LatLngBounds.builder()
-                .include(startLatLng).include(endLatLng).build();
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
+//        LatLngBounds markerBounds = LatLngBounds.builder()
+//                .include(startLatLng).include(endLatLng).build();
+//        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
     }
 
     private BitmapDescriptor getColoredMarker(){
@@ -138,8 +134,8 @@ public class MapView implements
 
 
     @Override
-    public void onPathLoaded(DirectionsRoute route, int taskPosition) {
-        taskDirectionsRoute[taskPosition] = route;
+    public void onPathLoaded(String encodedPath, int taskPosition) {
+        taskEncodedPaths[taskPosition] = encodedPath;
 
         //Directions are for current task on screen, add directly to map
         if (FOCUSED_TASK_POS == taskPosition) {
@@ -153,12 +149,12 @@ public class MapView implements
             return;
         }
 
-        DirectionsRoute taskRoute = taskDirectionsRoute[FOCUSED_TASK_POS];
-        if (taskRoute == null) {
+        String taskEncodedPath = taskEncodedPaths[FOCUSED_TASK_POS];
+        if (taskEncodedPath == null) {
             Log.d(TAG, "Selected task directions not loaded.");
             return;
         }
-        List<LatLng> points = PolyUtil.decode(taskRoute.overviewPolyline.getEncodedPath());
+        List<LatLng> points = PolyUtil.decode(taskEncodedPath);
 
         if (points != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
@@ -168,10 +164,12 @@ public class MapView implements
 
             polylineOptions.width(25);
             polylineOptions.color(Color.BLACK);
-            googleMap.addPolyline(polylineOptions);
+//            googleMap.addPolyline(polylineOptions);
 
-            polylineOptions.width(15);
-            polylineOptions.color(MATERIAL_COLORS[FOCUSED_TASK_POS % 16]);
+            polylineOptions.width(10);
+            int newCol = ColorUtils.setAlphaComponent(MATERIAL_COLORS[FOCUSED_TASK_POS % 16], 100);
+//            polylineOptions.color(MATERIAL_COLORS[FOCUSED_TASK_POS % 16]);
+            polylineOptions.color(newCol);
             googleMap.addPolyline(polylineOptions);
         }
     }

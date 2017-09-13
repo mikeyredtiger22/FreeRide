@@ -2,4 +2,9 @@
     <string name="app_name">FreeRide</string>
     <string name="title_activity_maps">Map</string>
     <string name="no_directions_loaded">Directions could not be loaded for this task</string>
+    <string name="loading_directions">Loading directions for this task...</string>
+    <string name="start_colon">Start:</string>
+    <string name="end_colon">End:</string>
+    <string name="duration_colon">Duration:</string>
+    <string name="points_colon">Points:</string>
 </resources>

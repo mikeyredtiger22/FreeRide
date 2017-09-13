@@ -2,7 +2,6 @@ package spikey.com.freeride.taskCardsMapView;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.DirectionsLeg;
 
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
@@ -27,7 +26,7 @@ public class TaskRecyclerViewAdapter
 
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
     private Task[] tasks;
-    private DirectionsRoute[] taskRouteData;
+    private DirectionsLeg[] allTasksRouteData;
     private boolean[] taskRouteLoaded;
     private int[] MATERIAL_COLORS;
     private Context context;
@@ -35,7 +34,7 @@ public class TaskRecyclerViewAdapter
     public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS, Context context) {
         super();
         this.tasks = tasks;
-        taskRouteData = new DirectionsRoute[tasks.length];
+        allTasksRouteData = new DirectionsLeg[tasks.length];
         taskRouteLoaded = new boolean[tasks.length]; //automatically sets all elements to false
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
@@ -50,22 +49,30 @@ public class TaskRecyclerViewAdapter
     @Override
     public void onBindViewHolder(TaskViewHolder holder, int position) {
         final Task task = tasks[position];
+        final int taskColor = MATERIAL_COLORS[position % 16];
 
-        DirectionsRoute taskRoute;
+        holder.taskCardView.setCardBackgroundColor(taskColor);
+        holder.taskIncentiveText.setText(String.format("%s%s",
+                context.getString(R.string.points_colon), task.getIncentive()));
+
         if (taskRouteLoaded[position]) {
             //Task directions have been loaded
             holder.loadingIcon.setVisibility(View.INVISIBLE);
-            if ((taskRoute = taskRouteData[position]) != null) {
-                holder.taskStartLocText.setText(taskRoute.legs[0].startAddress);
-                holder.taskEndLocText.setText(taskRoute.legs[0].endAddress);
+            DirectionsLeg tasksRouteData = allTasksRouteData[position];
+            if (tasksRouteData != null) {
+                holder.taskStartLocText.setText(String.format("%s%s",
+                        context.getString(R.string.start_colon), tasksRouteData.startAddress));
+                holder.taskEndLocText.setText(String.format("%s%s",
+                        context.getString(R.string.end_colon), tasksRouteData.endAddress));
+                holder.taskDurationText.setText(String.format("%s%s",
+                        context.getString(R.string.duration_colon), tasksRouteData.duration.humanReadable));
             } else {
                 //No directions returned from loader
                 holder.taskStartLocText.setText(R.string.no_directions_loaded);
             }
+        } else {
+            holder.taskStartLocText.setText(R.string.loading_directions);
         }
-        //todo strings to resources when UI finalised
-        final int color = holder.setCardBackgroundColor(position);
-        holder.taskIncentiveText.setText(String.format("Points: %s", task.getIncentive()));
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,7 +97,8 @@ public class TaskRecyclerViewAdapter
                 Intent openTaskDetails = new Intent(context, TaskDetailsActivity.class);
                 Log.d(TAG, "Opening task details");
                 openTaskDetails.putExtra("task", new Gson().toJson(task));
-                openTaskDetails.putExtra("color", color);
+                openTaskDetails.putExtra("allTasksRouteData", new Gson().toJson(task));
+                openTaskDetails.putExtra("color", taskColor);
                 context.startActivity(openTaskDetails);
             }
         });
@@ -104,8 +112,8 @@ public class TaskRecyclerViewAdapter
 
     //DIRECTIONS CALLBACK
     @Override
-    public void onRouteDataLoaded(DirectionsRoute route, int taskPosition) {
-        taskRouteData[taskPosition] = route;
+    public void onRouteDataLoaded(DirectionsLeg route, int taskPosition) {
+        allTasksRouteData[taskPosition] = route;
         taskRouteLoaded[taskPosition] = true;
         notifyItemChanged(taskPosition);
     }
@@ -134,14 +142,6 @@ public class TaskRecyclerViewAdapter
             taskDismissButton = itemView.findViewById(R.id.task_dismiss_button);
             taskMoreInfoButton = itemView.findViewById(R.id.task_more_info_button);
             loadingIcon = itemView.findViewById(R.id.task_loading_icon);
-        }
-
-        public int setCardBackgroundColor(int itemPosition) {
-            int color = MATERIAL_COLORS[itemPosition % 16];
-            taskCardView.setCardBackgroundColor(color);
-            double lum = ColorUtils.calculateLuminance(color);
-            taskDurationText.setText("lum: " + lum);
-            return color;
         }
     }
 

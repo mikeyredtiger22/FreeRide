@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsLeg;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
@@ -39,11 +40,11 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
     }
 
     public interface TaskRouteDataLoadedCallback {
-        void onRouteDataLoaded(DirectionsRoute route, int taskPosition);
+        void onRouteDataLoaded(DirectionsLeg routeInfo, int taskPosition);
     }
 
     public interface TaskPathLoadedCallback {
-        void onPathLoaded(DirectionsRoute route, int taskPosition);
+        void onPathLoaded(String encodedPath, int taskPosition);
     }
 
     @Override
@@ -70,8 +71,8 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
 
     @Override
     protected void onPostExecute(DirectionsRoute route) {
-        routeDataLoadedListener.onRouteDataLoaded(route, taskPosition);
-        pathLoadedListener.onPathLoaded(route, taskPosition);
+        routeDataLoadedListener.onRouteDataLoaded(route.legs[0], taskPosition);
+        pathLoadedListener.onPathLoaded(route.overviewPolyline.getEncodedPath(), taskPosition);
     }
 
     /**

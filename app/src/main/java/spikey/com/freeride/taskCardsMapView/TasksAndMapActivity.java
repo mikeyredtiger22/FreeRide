@@ -8,9 +8,12 @@ import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
+
+import java.util.Arrays;
 
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
@@ -37,7 +40,14 @@ public class TasksAndMapActivity extends FragmentActivity {
         }
     }
 
-    private void setUpTaskCardsView(final Task[] tasks) {
+    private void setUpTaskCardsView(Task[] tasks) {
+
+        //Limit to first 30 tasks if too many
+        if (tasks.length > 30) {
+            Toast.makeText(this, "Limiting to first 30 tasks from " + tasks.length + " total.",
+                    Toast.LENGTH_LONG).show();
+            tasks = Arrays.copyOfRange(tasks, 0, 30);
+        }
 
         //Colors
         int[] MATERIAL_COLORS = getMyMaterialColors();
@@ -46,7 +56,6 @@ public class TasksAndMapActivity extends FragmentActivity {
         //Set up recycler view (and adapter)
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
         tasksRecyclerView.setHasFixedSize(true); //will change when cards can be added/removed
-//        tasksRecyclerView.setLayerType(LAYER_TYPE_SOFTWARE, null);
         TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this);
         tasksRecyclerView.setAdapter(taskAdapter);
 
@@ -62,12 +71,18 @@ public class TasksAndMapActivity extends FragmentActivity {
         for (int taskPosition=0; taskPosition<tasks.length; taskPosition++) {
             Task selectedTask = tasks[taskPosition];
 
-            DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView,
-                    taskPosition,
+            DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, taskPosition,
                     selectedTask.getStartLat(), selectedTask.getStartLong(),
                     selectedTask.getEndLat(), selectedTask.getEndLong());
-            loader.execute();
+            //loader.execute();
         }
+        //only load first for testing
+        Task selectedTask = tasks[0];
+        DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, 0,
+                selectedTask.getStartLat(), selectedTask.getStartLong(),
+                selectedTask.getEndLat(), selectedTask.getEndLong());
+        loader.execute();
+
 
 
         //Start calculations for task indicator drawing
