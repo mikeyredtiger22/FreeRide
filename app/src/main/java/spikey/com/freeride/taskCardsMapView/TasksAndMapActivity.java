@@ -7,7 +7,10 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.SupportMapFragment;
@@ -33,7 +36,7 @@ public class TasksAndMapActivity extends FragmentActivity {
         if (intent.hasExtra("tasks")) {
             String allTaskDataString = intent.getStringExtra("tasks");
             if (allTaskDataString != null) {
-                Log.d(TAG, "OnCreate Intent Data: " + allTaskDataString);
+                //Log.d(TAG, "OnCreate Intent Data: " + allTaskDataString);
                 tasks = new Gson().fromJson(allTaskDataString, Task[].class);
                 setUpTaskCardsView(tasks);
             }
@@ -44,8 +47,21 @@ public class TasksAndMapActivity extends FragmentActivity {
 
         //Limit to first 30 tasks if too many
         if (tasks.length > 30) {
-            Toast.makeText(this, "Limiting to first 30 tasks from " + tasks.length + " total.",
-                    Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, "Limiting to first 30 tasks from " + tasks.length + " total.",
+//                    Toast.LENGTH_LONG).show();
+            View toastView = getLayoutInflater().inflate(R.layout.custom_toast_message_layout,
+                    (ViewGroup) findViewById(R.id.custom_toast_root_view));
+
+            TextView text = toastView.findViewById(R.id.toast_message);
+            text.setText("Limiting to first 30 tasks from " + tasks.length + " total.");
+
+            Toast toast = new Toast(this);
+            toast.setView(toastView);
+            toast.setGravity(Gravity.BOTTOM, 0, 50
+            );
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.show();
+
             tasks = Arrays.copyOfRange(tasks, 0, 30);
         }
 
@@ -68,14 +84,15 @@ public class TasksAndMapActivity extends FragmentActivity {
 
 
         //Initiate task directions loading
+        /*
         for (int taskPosition=0; taskPosition<tasks.length; taskPosition++) {
             Task selectedTask = tasks[taskPosition];
 
             DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, taskPosition,
                     selectedTask.getStartLat(), selectedTask.getStartLong(),
                     selectedTask.getEndLat(), selectedTask.getEndLong());
-            //loader.execute();
-        }
+            loader.execute();
+        }*/
         //only load first for testing
         Task selectedTask = tasks[0];
         DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, 0,

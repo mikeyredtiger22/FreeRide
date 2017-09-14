@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.maps.model.DirectionsLeg;
 
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
@@ -18,17 +19,29 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
     private Task task;
     private int taskColor;
+    private DirectionsLeg taskRouteData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
+
+        Gson gson = new Gson();
+
         Intent intent = getIntent();
         if (intent.hasExtra("task") && intent.hasExtra("color")) {
             taskColor = intent.getIntExtra("color", 0);
             String taskData = intent.getStringExtra("task");
             if (taskData != null) {
-                this.task = new Gson().fromJson(taskData, Task.class);
+                this.task = gson.fromJson(taskData, Task.class);
+            }
+        }
+
+        // Extract route data if included in intent
+        if (intent.hasExtra("routeData")) {
+            String taskRouteDataJson = intent.getStringExtra("routeData");
+            if (taskRouteDataJson != null) {
+                this.taskRouteData = gson.fromJson(taskRouteDataJson, DirectionsLeg.class);
             }
         }
 
@@ -60,6 +73,10 @@ public class TaskDetailsActivity extends AppCompatActivity {
         time         .setText(task.getCreationLocalDateTime());
         distance     .setText("");
         colorBlock.setBackgroundColor(taskColor);
+
+        if (taskRouteData != null) {
+            desc         .setText(taskRouteData.startAddress);
+        }
 
     }
 

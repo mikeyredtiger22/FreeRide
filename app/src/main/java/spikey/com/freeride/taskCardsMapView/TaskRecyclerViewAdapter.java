@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +34,7 @@ public class TaskRecyclerViewAdapter
         super();
         this.tasks = tasks;
         allTasksRouteData = new DirectionsLeg[tasks.length];
-        taskRouteLoaded = new boolean[tasks.length]; //automatically sets all elements to false
+        taskRouteLoaded = new boolean[tasks.length]; //all array elements are false when created
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
     }
@@ -47,7 +46,7 @@ public class TaskRecyclerViewAdapter
     }
 
     @Override
-    public void onBindViewHolder(TaskViewHolder holder, int position) {
+    public void onBindViewHolder(final TaskViewHolder holder, int position) {
         final Task task = tasks[position];
         final int taskColor = MATERIAL_COLORS[position % 16];
 
@@ -93,12 +92,14 @@ public class TaskRecyclerViewAdapter
         holder.taskMoreInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO only after directions data received
+                Gson gson = new Gson();
                 Intent openTaskDetails = new Intent(context, TaskDetailsActivity.class);
-                Log.d(TAG, "Opening task details");
-                openTaskDetails.putExtra("task", new Gson().toJson(task));
-                openTaskDetails.putExtra("allTasksRouteData", new Gson().toJson(task));
+                openTaskDetails.putExtra("task", gson.toJson(task));
                 openTaskDetails.putExtra("color", taskColor);
+                if (taskRouteLoaded[holder.getLayoutPosition()]) {
+                    String routeDataJson = gson.toJson(allTasksRouteData[holder.getLayoutPosition()]);
+                    openTaskDetails.putExtra("routeData", routeDataJson);
+                }
                 context.startActivity(openTaskDetails);
             }
         });

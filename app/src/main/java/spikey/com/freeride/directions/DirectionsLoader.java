@@ -71,8 +71,14 @@ public class DirectionsLoader extends AsyncTask<Void, Void, DirectionsRoute> {
 
     @Override
     protected void onPostExecute(DirectionsRoute route) {
-        routeDataLoadedListener.onRouteDataLoaded(route.legs[0], taskPosition);
-        pathLoadedListener.onPathLoaded(route.overviewPolyline.getEncodedPath(), taskPosition);
+        if (route != null) {
+            routeDataLoadedListener.onRouteDataLoaded(route.legs[0], taskPosition);
+            pathLoadedListener.onPathLoaded(route.overviewPolyline.getEncodedPath(), taskPosition);
+        } else {
+            //This lets the listener know that there were no directions returned and to stop waiting
+            routeDataLoadedListener.onRouteDataLoaded(null, taskPosition);
+            pathLoadedListener.onPathLoaded(null, taskPosition);
+        }
     }
 
     /**
