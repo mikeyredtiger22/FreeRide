@@ -56,8 +56,8 @@ public class CloudMessagingService extends FirebaseMessagingService {
                     break;
                 case "new-task":
                     //Task task = new Gson().fromJson(messageData.get("task"), Task.class);
-                    //TODO (much later) calculate location and Reputation Score
-                    String userId = FirebaseInstanceId.getInstance().getToken(); //todo clean
+                    // (much later) calculate location and Reputation Score
+                    String userId = FirebaseInstanceId.getInstance().getToken();
                     Log.d(TAG, "FB token: " + userId);
                     replyToNewTaskMessageViaDatabase(messageData.get("taskId"), userId);
                     break;
@@ -135,7 +135,7 @@ public class CloudMessagingService extends FirebaseMessagingService {
 
         Map<String, Object> dataPayload = new HashMap<>();
         dataPayload.put("messageType", "new-task-reply");
-        dataPayload.put("taskId", taskId); //todo remove after checking
+        dataPayload.put("taskId", taskId);
         dataPayload.put("userId", userId);
         dataPayload.put("locationScore", "100");
         dataPayload.put("reputationScore", "100");
@@ -154,7 +154,6 @@ public class CloudMessagingService extends FirebaseMessagingService {
         Task newTask = new Gson().fromJson(taskData, Task.class);
         Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification, taskData);
-        ////////////TODO if user accepts task
         secureTask(taskId);
     }
 

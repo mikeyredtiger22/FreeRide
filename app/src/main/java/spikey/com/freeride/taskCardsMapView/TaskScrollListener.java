@@ -1,7 +1,6 @@
 package spikey.com.freeride.taskCardsMapView;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ public class TaskScrollListener extends RecyclerView.OnScrollListener {
         } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
             //Sometimes state doesn't reach idle when scrolling to first or last item
             int newFocusedTaskPosition = getFocusedTaskPosition(recyclerView);
-            Log.d(TAG, "IDLE  NEW:" + newFocusedTaskPosition + "  OLD:" + focusedTaskPosition);
             if (newFocusedTaskPosition != this.focusedTaskPosition) {
                 if (newFocusedTaskPosition == 0) {
                     setNewPositionAndNotifyListeners(newFocusedTaskPosition);

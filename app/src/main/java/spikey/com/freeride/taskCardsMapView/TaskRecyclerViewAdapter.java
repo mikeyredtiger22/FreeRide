@@ -51,7 +51,7 @@ public class TaskRecyclerViewAdapter
         final int taskColor = MATERIAL_COLORS[position % 16];
 
         holder.taskCardView.setCardBackgroundColor(taskColor);
-        holder.taskIncentiveText.setText(String.format("%s%s",
+        holder.taskIncentiveText.setText(String.format("%s %s",
                 context.getString(R.string.points_colon), task.getIncentive()));
 
         if (taskRouteLoaded[position]) {
@@ -59,15 +59,15 @@ public class TaskRecyclerViewAdapter
             holder.loadingIcon.setVisibility(View.INVISIBLE);
             DirectionsLeg tasksRouteData = allTasksRouteData[position];
             if (tasksRouteData != null) {
-                holder.taskStartLocText.setText(String.format("%s%s",
+                holder.taskStartLocText.setText(String.format("%s %s",
                         context.getString(R.string.start_colon), tasksRouteData.startAddress));
-                holder.taskEndLocText.setText(String.format("%s%s",
+                holder.taskEndLocText.setText(String.format("%s %s",
                         context.getString(R.string.end_colon), tasksRouteData.endAddress));
-                holder.taskDurationText.setText(String.format("%s%s",
+                holder.taskDurationText.setText(String.format("%s %s",
                         context.getString(R.string.duration_colon), tasksRouteData.duration.humanReadable));
             } else {
                 //No directions returned from loader
-                holder.taskStartLocText.setText(R.string.no_directions_loaded);
+                holder.taskStartLocText.setText(R.string.directions_cant_be_loaded);
             }
         } else {
             holder.taskStartLocText.setText(R.string.loading_directions);
@@ -77,15 +77,13 @@ public class TaskRecyclerViewAdapter
             @Override
             public void onClick(View view) {
                 DatabaseOperations.secureTask(task.getTaskId());
-                //TODO active task screen
+                //confirmation -> active task screen
             }
         });
 
         holder.taskDismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO remove from recycler view (without breaking stuff)
-                //TODO never let user see this task again - undoable in settings
             }
         });
 

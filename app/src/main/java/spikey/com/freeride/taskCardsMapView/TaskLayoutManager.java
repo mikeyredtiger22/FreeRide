@@ -10,16 +10,8 @@ import spikey.com.freeride.VALUES;
  * Layout Manager padding works differently to setting the padding of the recycler view or its
  * items.
  *
- * TODO calls many times!
- * This means the same calculations will be made once, instead of every time a
- * new item is created or comes into view??
- *
  * The methods overwrite the left, right and top padding. For more information read the method
  * comments.
- *
- * TODO still not sure how padding affects items and layout.. so much work for such little code
- *
- * add super.getXPadding returns 0 for my tests.
  */
 public class TaskLayoutManager extends LinearLayoutManager {
 
@@ -66,7 +58,6 @@ public class TaskLayoutManager extends LinearLayoutManager {
     /**
      * This calculates the padding for each edge of the recycler view. I want the cards to be
      * 0.9 * parent width, so I add a padding of 0.05 * parent width to each side.
-     * todo how it affects cards and such. not the same as recycler view padding
      * @return padding (pixels) for each edge
      */
     private int getEdgePadding() {

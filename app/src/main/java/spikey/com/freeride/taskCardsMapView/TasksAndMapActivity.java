@@ -57,13 +57,14 @@ public class TasksAndMapActivity extends FragmentActivity {
 
             Toast toast = new Toast(this);
             toast.setView(toastView);
-            toast.setGravity(Gravity.BOTTOM, 0, 50
-            );
+            toast.setGravity(Gravity.BOTTOM, 0, 50);
             toast.setDuration(Toast.LENGTH_LONG);
             toast.show();
 
             tasks = Arrays.copyOfRange(tasks, 0, 30);
         }
+
+        boolean singleTask = tasks.length == 1;
 
         //Colors
         int[] MATERIAL_COLORS = getMyMaterialColors();
@@ -76,7 +77,7 @@ public class TasksAndMapActivity extends FragmentActivity {
         tasksRecyclerView.setAdapter(taskAdapter);
 
 
-        //Set up map view todo takes a while to start activity
+        //Set up map view, takes a while to start activity
         MapView mapView = new MapView(this, tasks, MATERIAL_COLORS, tasksRecyclerView);
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_view);
@@ -101,20 +102,21 @@ public class TasksAndMapActivity extends FragmentActivity {
         loader.execute();
 
 
-
-        //Start calculations for task indicator drawing
-        float screenWidth = getResources().getDisplayMetrics().widthPixels;
-        float screenDensity = getResources().getDisplayMetrics().density;
-        TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(MATERIAL_COLORS,
-                tasks.length, screenWidth, screenDensity);
-        tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
-
-
         //Setup scroll listener and focused task listeners
         TaskScrollListener taskScrollListener = new TaskScrollListener(tasks.length);
         tasksRecyclerView.addOnScrollListener(taskScrollListener);
         taskScrollListener.addFocusedTaskListener(mapView);
-        taskScrollListener.addFocusedTaskListener(taskIndicatorDecoration);
+
+
+        //Start calculations for task indicator drawing
+        if (!singleTask) {
+            float screenWidth = getResources().getDisplayMetrics().widthPixels;
+            float screenDensity = getResources().getDisplayMetrics().density;
+            TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(MATERIAL_COLORS,
+                    tasks.length, screenWidth, screenDensity);
+            tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
+            taskScrollListener.addFocusedTaskListener(taskIndicatorDecoration);
+        }
 
 
         //Other helper classes

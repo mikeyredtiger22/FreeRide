@@ -20,6 +20,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
     private Task task;
     private int taskColor;
     private DirectionsLeg taskRouteData;
+    private boolean hasRouteData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         Gson gson = new Gson();
 
+        //Get task data
         Intent intent = getIntent();
         if (intent.hasExtra("task") && intent.hasExtra("color")) {
             taskColor = intent.getIntExtra("color", 0);
@@ -37,8 +39,9 @@ public class TaskDetailsActivity extends AppCompatActivity {
             }
         }
 
-        // Extract route data if included in intent
+        //Extract route data if included in intent
         if (intent.hasExtra("routeData")) {
+            hasRouteData = true;
             String taskRouteDataJson = intent.getStringExtra("routeData");
             if (taskRouteDataJson != null) {
                 this.taskRouteData = gson.fromJson(taskRouteDataJson, DirectionsLeg.class);
@@ -65,17 +68,24 @@ public class TaskDetailsActivity extends AppCompatActivity {
         TextView distance = findViewById(R.id.task_details_distance_info);
         View colorBlock = findViewById(R.id.task_details_color_block);
 
-        title        .setText(task.getTitle());
-        desc         .setText("");
-        incentive    .setText(String.valueOf(task.getIncentive()));
-        startLocation.setText(String.format("%s, %s", task.getStartLat(), task.getStartLong()));
-        endLocation  .setText(String.format("%s, %s", task.getEndLat(), task.getEndLong()));
-        time         .setText(task.getCreationLocalDateTime());
-        distance     .setText("");
+        title     .setText(task.getTitle());
+        desc      .setText(task.getDescription());
+        incentive .setText(String.valueOf(task.getIncentive()));
+        time      .setText(task.getCreationLocalDateTime());
         colorBlock.setBackgroundColor(taskColor);
 
         if (taskRouteData != null) {
-            desc         .setText(taskRouteData.startAddress);
+            startLocation.setText(taskRouteData.startAddress);
+            endLocation  .setText(taskRouteData.endAddress);
+            distance     .setText(taskRouteData.distance.humanReadable);
+        } else {
+            startLocation.setText(String.format("Lat,Long: %s, %s", task.getStartLat(), task.getStartLong()));
+            endLocation  .setText(String.format("Lat,Long: %s, %s", task.getEndLat(), task.getEndLong()));
+            if (hasRouteData) {
+                distance.setText(R.string.directions_not_loaded_yet);
+            } else {
+                distance.setText(R.string.directions_cant_be_loaded);
+            }
         }
 
     }

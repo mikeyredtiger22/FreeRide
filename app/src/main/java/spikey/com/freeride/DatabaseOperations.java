@@ -72,7 +72,7 @@ public class DatabaseOperations {
                 Log.d(TAG, "pre-transaction Data value: " + mutableData);
                 Task task = mutableData.getValue(Task.class);
                 if (task == null) {
-                    return Transaction.success(mutableData); //todo ??
+                    return Transaction.success(mutableData);
                 } else {
                     if (task.getUser() == null) {
                         task.setUser(userId);
@@ -131,12 +131,11 @@ public class DatabaseOperations {
         ref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //TODO task is converted to object, then json again
                 Task newTask = dataSnapshot.getValue(Task.class);
                 String taskId = dataSnapshot.getKey();
                 String treatment = dataSnapshot.getRef().getParent().getKey();
-                Log.d(TAG, "New Task Added To DB, TASK ID::::" + taskId);
-                //allowing to repeated testing \/ \/ damn italics ruining my arrows c'mon
+                Log.d(TAG, "New Task Added To DB, TASK ID:" + taskId);
+                //allowing to repeated testing:
                 //dataSnapshot.getRef().removeValue();
             }
 

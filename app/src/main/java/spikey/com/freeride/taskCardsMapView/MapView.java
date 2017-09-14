@@ -15,11 +15,14 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,6 +30,7 @@ import com.google.maps.android.PolyUtil;
 
 import java.util.List;
 
+import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 import spikey.com.freeride.directions.DirectionsLoader;
 
@@ -88,8 +92,7 @@ public class MapView implements
 
             googleMap.setMyLocationEnabled(true);
         } else {
-            Toast.makeText(context, "Need Location Permission", Toast.LENGTH_SHORT).show();
-            //TODO need location?
+            Toast.makeText(context, "No Location Permission", Toast.LENGTH_SHORT).show();
         }
 
         location.getLastLocation().addOnSuccessListener(this);
@@ -102,27 +105,26 @@ public class MapView implements
             return;
         }
         if (!showAllMarkers) {
-            googleMap.clear(); //removes markers from map
+            googleMap.clear(); //removes markers and paths from map
         }
 
 
         Task selectedTask = tasks[FOCUSED_TASK_POS];
-        //todo set limit to title, add ellipses
         LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
         LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
 
         BitmapDescriptor coloredMarker = getColoredMarker();
 
-//        googleMap.addMarker(new MarkerOptions()
-//                .position(startLatLng).icon(coloredMarker).title(selectedTask.getTitle()));
-//        googleMap.addMarker(new MarkerOptions()
-//                .position(endLatLng).icon(coloredMarker).title("End"));
+        googleMap.addMarker(new MarkerOptions()
+                .position(startLatLng).icon(coloredMarker).title(context.getString(R.string.start)));
+        googleMap.addMarker(new MarkerOptions()
+                .position(endLatLng).icon(coloredMarker).title(context.getString(R.string.end)));
 
         addCurrentTaskDirectionsToMap();
 
-//        LatLngBounds markerBounds = LatLngBounds.builder()
-//                .include(startLatLng).include(endLatLng).build();
-//        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
+        LatLngBounds markerBounds = LatLngBounds.builder()
+                .include(startLatLng).include(endLatLng).build();
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
     }
 
     private BitmapDescriptor getColoredMarker(){
@@ -164,12 +166,10 @@ public class MapView implements
 
             polylineOptions.width(25);
             polylineOptions.color(Color.BLACK);
-//            googleMap.addPolyline(polylineOptions);
+            googleMap.addPolyline(polylineOptions);
 
-            polylineOptions.width(10);
-            int newCol = ColorUtils.setAlphaComponent(MATERIAL_COLORS[FOCUSED_TASK_POS % 16], 100);
-//            polylineOptions.color(MATERIAL_COLORS[FOCUSED_TASK_POS % 16]);
-            polylineOptions.color(newCol);
+            polylineOptions.width(15);
+            polylineOptions.color(MATERIAL_COLORS[FOCUSED_TASK_POS % 16]);
             googleMap.addPolyline(polylineOptions);
         }
     }

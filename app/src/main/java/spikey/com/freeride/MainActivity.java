@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.MapView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -64,6 +65,19 @@ public class MainActivity extends AppCompatActivity{
                 DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
             }
         });
+
+        //Speeds up the loading of the TasksAndMapActivity by pre-loading assets for the map.
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MapView mv = new MapView(getApplicationContext());
+                    mv.onCreate(null);
+                    mv.onPause();
+                    mv.onDestroy();
+                }catch (Exception ignored){}
+            }
+        }).start();
     }
 
     @Override
