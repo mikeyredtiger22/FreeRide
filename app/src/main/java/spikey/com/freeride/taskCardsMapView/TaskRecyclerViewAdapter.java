@@ -24,24 +24,32 @@ public class TaskRecyclerViewAdapter
         implements DirectionsLoader.TaskRouteDataLoadedCallback {
 
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
+
     private Task[] tasks;
     private DirectionsLeg[] allTasksRouteData;
     private boolean[] taskRouteLoaded;
+
     private int[] MATERIAL_COLORS;
     private Context context;
+    private int taskCardWidth;
 
-    public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS, Context context) {
+    public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS,
+                                   Context context, int taskCardWidth) {
         super();
         this.tasks = tasks;
-        allTasksRouteData = new DirectionsLeg[tasks.length];
-        taskRouteLoaded = new boolean[tasks.length]; //all array elements are false when created
+        this.allTasksRouteData = new DirectionsLeg[tasks.length];
+        this.taskRouteLoaded = new boolean[tasks.length]; //all array elements are false when created
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
+        this.taskCardWidth = taskCardWidth;
     }
 
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_card_view, parent, false);
+
+        view.getLayoutParams().width = taskCardWidth;
+
         return new TaskViewHolder(view);
     }
 

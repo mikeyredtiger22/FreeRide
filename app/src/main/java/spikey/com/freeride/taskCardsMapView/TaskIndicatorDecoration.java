@@ -30,18 +30,21 @@ public class TaskIndicatorDecoration extends RecyclerView.ItemDecoration
 
     private void calculate(float screenWidth, float screenDensity) {
         //Align start of indicators with start of text on card
-        float cardLayoutPadding = screenWidth * 0.05f; // card padding from layout manager
-        float cardTextPadding = 16 * screenDensity; // text padding from card layout
+        float cardLayoutPadding = screenWidth * 0.075f; // screen to card padding from adapter
+        float cardTextPadding = 16 * screenDensity; // card to text padding from layout
         float indicatorPadding = cardLayoutPadding + cardTextPadding;
 
+
+        //totalBarWidth includes (90%) bar (drawing) and (10%) gap between bars
+        //for N items, there will be N bars and N-1 gaps. Which equals N totalBarWidths - 1 gap
         float totalUseableSpace = screenWidth - (indicatorPadding * 2);
-        float toalBarWidth = totalUseableSpace / taskCount;
-        float barWidth = toalBarWidth * 0.9f;
-        float xStartPos = indicatorPadding + (barWidth * 0.05f);
+        float totalBarWidth = totalUseableSpace / ((float) taskCount - 0.1f);
+        float barDrawWidth = totalBarWidth * 0.9f;
+        float xStartPos = indicatorPadding;
 
         this.drawXStartPos = xStartPos;
-        this.drawTotalBarWidth = toalBarWidth;
-        this.drawBarWidth = barWidth;
+        this.drawTotalBarWidth = totalBarWidth;
+        this.drawBarWidth = barDrawWidth;
         this.barHeight = screenDensity * 5;
     }
 

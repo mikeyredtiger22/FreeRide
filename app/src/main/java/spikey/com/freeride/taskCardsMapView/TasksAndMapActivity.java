@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.graphics.ColorUtils;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -65,15 +66,20 @@ public class TasksAndMapActivity extends FragmentActivity {
         }
 
         boolean singleTask = tasks.length == 1;
-
-        //Colors
         int[] MATERIAL_COLORS = getMyMaterialColors();
+        float screenWidth = getResources().getDisplayMetrics().widthPixels;
+        float screenDensity = getResources().getDisplayMetrics().density;
+        int cardPadding = (int) (0.075 * screenWidth);
+        int outerCardPadding = cardPadding - (int) (8 * screenDensity); //negate 8dp margin of card
+        int cardWidth = (int) (0.85 * screenWidth);
 
 
         //Set up recycler view (and adapter)
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
+        tasksRecyclerView.setPadding(outerCardPadding, 0, outerCardPadding, 0);
         tasksRecyclerView.setHasFixedSize(true); //will change when cards can be added/removed
-        TaskRecyclerViewAdapter taskAdapter = new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this);
+        TaskRecyclerViewAdapter taskAdapter =
+                new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this, cardWidth);
         tasksRecyclerView.setAdapter(taskAdapter);
 
 
@@ -103,15 +109,13 @@ public class TasksAndMapActivity extends FragmentActivity {
 
 
         //Setup scroll listener and focused task listeners
-        TaskScrollListener taskScrollListener = new TaskScrollListener(tasks.length);
+        TaskScrollListener taskScrollListener = new TaskScrollListener(tasks.length, cardPadding);
         tasksRecyclerView.addOnScrollListener(taskScrollListener);
         taskScrollListener.addFocusedTaskListener(mapView);
 
 
         //Start calculations for task indicator drawing
         if (!singleTask) {
-            float screenWidth = getResources().getDisplayMetrics().widthPixels;
-            float screenDensity = getResources().getDisplayMetrics().density;
             TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(MATERIAL_COLORS,
                     tasks.length, screenWidth, screenDensity);
             tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);
@@ -119,9 +123,8 @@ public class TasksAndMapActivity extends FragmentActivity {
         }
 
 
-        //Other helper classes
-        TaskLayoutManager layoutManager = new TaskLayoutManager(this, tasksRecyclerView);
-        tasksRecyclerView.setLayoutManager(layoutManager);
+        tasksRecyclerView.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(tasksRecyclerView);

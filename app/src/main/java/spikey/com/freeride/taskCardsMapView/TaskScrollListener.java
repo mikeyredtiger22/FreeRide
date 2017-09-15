@@ -10,13 +10,15 @@ public class TaskScrollListener extends RecyclerView.OnScrollListener {
     private static final String TAG = TaskScrollListener.class.getSimpleName();
 
     private final int LAST_TASK_INDEX;
+    private final int CARD_PADDING;
     private int focusedTaskPosition;
     private ArrayList<FocusedTaskListener> focusedTaskListeners;
 
 
-    public TaskScrollListener(int taskCount) {
+    public TaskScrollListener(int taskCount, int cardPadding) {
         this.LAST_TASK_INDEX = taskCount - 1;
         focusedTaskListeners = new ArrayList<>();
+        this.CARD_PADDING = cardPadding;
     }
 
     public interface FocusedTaskListener {
@@ -27,23 +29,38 @@ public class TaskScrollListener extends RecyclerView.OnScrollListener {
         focusedTaskListeners.add(listener);
     }
 
+    //If user scrolls quickly to first or last item, scroll state does not reach idle.
+    //This method calculates when the first or last item in the recycler view is centered
+    @Override
+    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        if (recyclerView.getChildCount() == 2) {
+            View view = recyclerView.getChildAt(0);
+            int layoutPos = recyclerView.getChildLayoutPosition(view);
+            if (layoutPos == 0) {
+                //First item in recycler view
+                int left = view.getLeft();
+                if (left == CARD_PADDING) {
+                    setNewPositionAndNotifyListeners(0);
+                }
+            } else {
+                //Last item in recycler view
+                View viewLast = recyclerView.getChildAt(1);
+                int left = viewLast.getLeft();
+                if (left == CARD_PADDING) {
+                    setNewPositionAndNotifyListeners(LAST_TASK_INDEX);
+                }
+            }
+        }
+
+
+    }
+
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-
         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
             int newFocusedTaskPosition = getFocusedTaskPosition(recyclerView);
             if (newFocusedTaskPosition != this.focusedTaskPosition) {
                 setNewPositionAndNotifyListeners(newFocusedTaskPosition);
-            }
-        } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
-            //Sometimes state doesn't reach idle when scrolling to first or last item
-            int newFocusedTaskPosition = getFocusedTaskPosition(recyclerView);
-            if (newFocusedTaskPosition != this.focusedTaskPosition) {
-                if (newFocusedTaskPosition == 0) {
-                    setNewPositionAndNotifyListeners(newFocusedTaskPosition);
-                } else if (newFocusedTaskPosition == LAST_TASK_INDEX) {
-                    setNewPositionAndNotifyListeners(newFocusedTaskPosition);
-                }
             }
         }
     }

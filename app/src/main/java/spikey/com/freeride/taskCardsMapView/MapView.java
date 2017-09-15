@@ -101,7 +101,7 @@ public class MapView implements
     }
 
     private void updateMap() {
-        if (tasks.length == 0) {
+        if (tasks.length == 0 || googleMap == null) {
             return;
         }
         if (!showAllMarkers) {
