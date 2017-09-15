@@ -19,9 +19,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
 
 import spikey.com.freeride.taskCardsMapView.TasksAndMapActivity;
 
@@ -114,20 +111,20 @@ public class MainActivity extends AppCompatActivity{
                 progressCircle.setVisibility(View.INVISIBLE);
                 return;
             }
-//                String receivedData = dataSnapshot.getValue().toString();
-//                resultsTextView.setText(receivedData);
-            //Log.d(TAG, "Get Available tasks: " + receivedData);
-            Gson gson = new Gson();
-            ArrayList<Object> tasksObjectArray = new ArrayList<>();
 
+            //We use an array to store the tasks because it is much easier for the rest of the
+            //application to deal with an ordered collection.
+            int count = (int) dataSnapshot.getChildrenCount();
+            String[] tasksJsonArray = new String[count];
+            int index = 0;
             for (DataSnapshot taskData : dataSnapshot.getChildren()) {
-                tasksObjectArray.add(taskData.getValue());
+                //tasksObjectArray.add(taskData.getValue());
+                tasksJsonArray[index] = taskData.getValue().toString();
+                index++;
             }
 
-            Object[] tasks = tasksObjectArray.toArray();
-            String tasksJson = gson.toJson(tasks);
             Intent openTasksView = new Intent(context, TasksAndMapActivity.class);
-            openTasksView.putExtra("tasks", tasksJson);
+            openTasksView.putExtra("tasks", tasksJsonArray);
             context.startActivity(openTasksView);
         }
 

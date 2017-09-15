@@ -38,6 +38,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:26.0.1'
     compile 'com.google.maps:google-maps-services:0.1.20'
     implementation 'com.google.maps.android:android-maps-utils:0.5'
+    implementation 'com.fatboyindustrial.gson-jodatime-serialisers:gson-jodatime-serialisers:1.6.0'
 }
 
 

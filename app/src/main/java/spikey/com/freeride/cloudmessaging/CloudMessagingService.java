@@ -13,14 +13,12 @@ import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
-import spikey.com.freeride.Task;
 import spikey.com.freeride.taskCardsMapView.TasksAndMapActivity;
 
 
@@ -151,8 +149,8 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * @param taskId of task
      */
     private void newTaskNotification(RemoteMessage.Notification notification, String taskData, String taskId) {
-        Task newTask = new Gson().fromJson(taskData, Task.class);
-        Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
+        // todo use newer Gson serializer Task newTask = new Gson().fromJson(taskData, Task.class);
+        //Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification, taskData);
         secureTask(taskId);
     }

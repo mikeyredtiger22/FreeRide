@@ -8,27 +8,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.Gson;
-import com.google.maps.model.DirectionsLeg;
+import com.google.gson.GsonBuilder;
 
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
-import spikey.com.freeride.directions.DirectionsLoader;
 
 public class TaskRecyclerViewAdapter
-        extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder>
-        implements DirectionsLoader.TaskRouteDataLoadedCallback {
+        extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder>{
 
     private static final String TAG = TaskRecyclerViewAdapter.class.getSimpleName();
 
     private Task[] tasks;
-    private DirectionsLeg[] allTasksRouteData;
-    private boolean[] taskRouteLoaded;
-
     private int[] MATERIAL_COLORS;
     private Context context;
     private int taskCardWidth;
@@ -37,8 +32,6 @@ public class TaskRecyclerViewAdapter
                                    Context context, int taskCardWidth) {
         super();
         this.tasks = tasks;
-        this.allTasksRouteData = new DirectionsLeg[tasks.length];
-        this.taskRouteLoaded = new boolean[tasks.length]; //all array elements are false when created
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.context = context;
         this.taskCardWidth = taskCardWidth;
@@ -62,23 +55,16 @@ public class TaskRecyclerViewAdapter
         holder.taskIncentiveText.setText(String.format("%s %s",
                 context.getString(R.string.points_colon), task.getIncentive()));
 
-        if (taskRouteLoaded[position]) {
-            //Task directions have been loaded
-            holder.loadingIcon.setVisibility(View.INVISIBLE);
-            DirectionsLeg tasksRouteData = allTasksRouteData[position];
-            if (tasksRouteData != null) {
-                holder.taskStartLocText.setText(String.format("%s %s",
-                        context.getString(R.string.start_colon), tasksRouteData.startAddress));
-                holder.taskEndLocText.setText(String.format("%s %s",
-                        context.getString(R.string.end_colon), tasksRouteData.endAddress));
-                holder.taskDurationText.setText(String.format("%s %s",
-                        context.getString(R.string.duration_colon), tasksRouteData.duration.humanReadable));
-            } else {
-                //No directions returned from loader
-                holder.taskStartLocText.setText(R.string.directions_cant_be_loaded);
-            }
+        if (task.getRouteData() != null) {
+            holder.taskStartLocText.setText(String.format("%s %s",
+                    context.getString(R.string.start_colon), task.getRouteData().startAddress));
+            holder.taskEndLocText.setText(String.format("%s %s",
+                    context.getString(R.string.end_colon), task.getRouteData().endAddress));
+            holder.taskDurationText.setText(String.format("%s %s",
+                    context.getString(R.string.duration_colon), task.getRouteData().duration.humanReadable));
         } else {
-            holder.taskStartLocText.setText(R.string.loading_directions);
+            //No directions for this task
+            holder.taskStartLocText.setText(R.string.directions_cant_be_loaded);
         }
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
@@ -98,14 +84,10 @@ public class TaskRecyclerViewAdapter
         holder.taskMoreInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Gson gson = new Gson();
+                Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
                 Intent openTaskDetails = new Intent(context, TaskDetailsActivity.class);
                 openTaskDetails.putExtra("task", gson.toJson(task));
                 openTaskDetails.putExtra("color", taskColor);
-                if (taskRouteLoaded[holder.getLayoutPosition()]) {
-                    String routeDataJson = gson.toJson(allTasksRouteData[holder.getLayoutPosition()]);
-                    openTaskDetails.putExtra("routeData", routeDataJson);
-                }
                 context.startActivity(openTaskDetails);
             }
         });
@@ -114,15 +96,6 @@ public class TaskRecyclerViewAdapter
     @Override
     public int getItemCount() {
         return tasks.length;
-    }
-
-
-    //DIRECTIONS CALLBACK
-    @Override
-    public void onRouteDataLoaded(DirectionsLeg route, int taskPosition) {
-        allTasksRouteData[taskPosition] = route;
-        taskRouteLoaded[taskPosition] = true;
-        notifyItemChanged(taskPosition);
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
@@ -135,7 +108,6 @@ public class TaskRecyclerViewAdapter
         Button taskAcceptButton;
         Button taskDismissButton;
         Button taskMoreInfoButton;
-        ProgressBar loadingIcon;
 
         public TaskViewHolder(View itemView) {
             super(itemView);
@@ -148,7 +120,6 @@ public class TaskRecyclerViewAdapter
             taskAcceptButton = itemView.findViewById(R.id.task_accept_button);
             taskDismissButton = itemView.findViewById(R.id.task_dismiss_button);
             taskMoreInfoButton = itemView.findViewById(R.id.task_more_info_button);
-            loadingIcon = itemView.findViewById(R.id.task_loading_icon);
         }
     }
 

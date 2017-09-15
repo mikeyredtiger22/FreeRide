@@ -3,10 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context="spikey.com.freeride.taskCardsMapView.TaskDetailsActivity"
-    android:theme="@style/TaskDetails">
+    android:theme="@style/TaskDetails"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp">
 
 
     <TextView
@@ -15,8 +17,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:paddingTop="8dp"
-        android:paddingStart="16dp"
         android:text="Title " />
     <TextView
         android:id="@+id/task_details_title_info"
@@ -34,7 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_title"
-        android:paddingStart="16dp"
         android:text="Description " />
     <TextView
         android:id="@+id/task_details_desc_info"
@@ -52,7 +51,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_desc"
-        android:paddingStart="16dp"
         android:text="Points " />
     <TextView
         android:id="@+id/task_details_incentive_info"
@@ -70,8 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_incentive"
-        android:paddingStart="16dp"
-        android:text="Start Location " />
+        android:text="Start " />
     <TextView
         android:id="@+id/task_details_start_location_info"
         android:layout_width="wrap_content"
@@ -88,8 +85,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_start_location"
-        android:paddingStart="16dp"
-        android:text="End Location " />
+        android:text="End " />
     <TextView
         android:id="@+id/task_details_end_location_info"
         android:layout_width="wrap_content"
@@ -101,21 +97,20 @@
 
 
     <TextView
-        android:id="@+id/task_details_time"
+        android:id="@+id/task_details_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_end_location"
-        android:paddingStart="16dp"
-        android:text="Time " />
+        android:text="Duration " />
     <TextView
-        android:id="@+id/task_details_time_info"
+        android:id="@+id/task_details_duration_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/task_details_time"
-        android:layout_alignBaseline="@id/task_details_time"
+        android:layout_toEndOf="@id/task_details_duration"
+        android:layout_alignBaseline="@id/task_details_duration"
         android:textSize="18sp"
-        tools:text="Task_time" />
+        tools:text="Task_duration" />
 
 
     <TextView
@@ -123,8 +118,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/task_details_time"
-        android:paddingStart="16dp"
+        android:layout_below="@id/task_details_duration"
         android:text="Distance " />
     <TextView
         android:id="@+id/task_details_distance_info"
@@ -142,9 +136,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@id/task_details_distance"
-        android:paddingStart="16dp"
         android:text="Color " />
-
     <View
         android:id="@+id/task_details_color_block"
         android:layout_width="30dp"
@@ -152,7 +144,6 @@
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/task_details_color"
         android:layout_alignBottom="@id/task_details_color"
-        android:layout_margin="0dp"
         android:background="@color/colorAccent"/>
 
 </RelativeLayout>

@@ -14,14 +14,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.Arrays;
 
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
-import spikey.com.freeride.directions.DirectionsLoader;
 
 public class TasksAndMapActivity extends FragmentActivity {
 
@@ -35,10 +36,14 @@ public class TasksAndMapActivity extends FragmentActivity {
         Task[] tasks;
         Intent intent = getIntent();
         if (intent.hasExtra("tasks")) {
-            String allTaskDataString = intent.getStringExtra("tasks");
-            if (allTaskDataString != null) {
-                //Log.d(TAG, "OnCreate Intent Data: " + allTaskDataString);
-                tasks = new Gson().fromJson(allTaskDataString, Task[].class);
+            String[] allTasksJsonArray = intent.getStringArrayExtra("tasks");
+            if (allTasksJsonArray != null) {
+                Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
+                int taskCount = allTasksJsonArray.length;
+                tasks = new Task[taskCount];
+                for (int i = 0; i < taskCount; i++) {
+                    tasks[i] = gson.fromJson(allTasksJsonArray[i], Task.class);
+                }
                 setUpTaskCardsView(tasks);
             }
         }
@@ -48,13 +53,11 @@ public class TasksAndMapActivity extends FragmentActivity {
 
         //Limit to first 30 tasks if too many
         if (tasks.length > 30) {
-//            Toast.makeText(this, "Limiting to first 30 tasks from " + tasks.length + " total.",
-//                    Toast.LENGTH_LONG).show();
             View toastView = getLayoutInflater().inflate(R.layout.custom_toast_message_layout,
                     (ViewGroup) findViewById(R.id.custom_toast_root_view));
 
             TextView text = toastView.findViewById(R.id.toast_message);
-            text.setText("Limiting to first 30 tasks from " + tasks.length + " total.");
+            text.setText(String.format(getString(R.string.limiting_tasks), tasks.length));
 
             Toast toast = new Toast(this);
             toast.setView(toastView);
@@ -65,22 +68,9 @@ public class TasksAndMapActivity extends FragmentActivity {
             tasks = Arrays.copyOfRange(tasks, 0, 30);
         }
 
-        boolean singleTask = tasks.length == 1;
         int[] MATERIAL_COLORS = getMyMaterialColors();
-        float screenWidth = getResources().getDisplayMetrics().widthPixels;
-        float screenDensity = getResources().getDisplayMetrics().density;
-        int cardPadding = (int) (0.075 * screenWidth);
-        int outerCardPadding = cardPadding - (int) (8 * screenDensity); //negate 8dp margin of card
-        int cardWidth = (int) (0.85 * screenWidth);
 
-
-        //Set up recycler view (and adapter)
         RecyclerView tasksRecyclerView = findViewById(R.id.tasks_recycler_view);
-        tasksRecyclerView.setPadding(outerCardPadding, 0, outerCardPadding, 0);
-        tasksRecyclerView.setHasFixedSize(true); //will change when cards can be added/removed
-        TaskRecyclerViewAdapter taskAdapter =
-                new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this, cardWidth);
-        tasksRecyclerView.setAdapter(taskAdapter);
 
 
         //Set up map view, takes a while to start activity
@@ -90,22 +80,20 @@ public class TasksAndMapActivity extends FragmentActivity {
         mapFragment.getMapAsync(mapView);
 
 
-        //Initiate task directions loading
-        /*
-        for (int taskPosition=0; taskPosition<tasks.length; taskPosition++) {
-            Task selectedTask = tasks[taskPosition];
+        //Card layout calculations
+        float screenWidth = getResources().getDisplayMetrics().widthPixels;
+        float screenDensity = getResources().getDisplayMetrics().density;
+        int cardPadding = (int) (0.075 * screenWidth);
+        int outerCardPadding = cardPadding - (int) (8 * screenDensity); //negate 8dp margin of card
+        int cardWidth = (int) (0.85 * screenWidth);
 
-            DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, taskPosition,
-                    selectedTask.getStartLat(), selectedTask.getStartLong(),
-                    selectedTask.getEndLat(), selectedTask.getEndLong());
-            loader.execute();
-        }*/
-        //only load first for testing
-        Task selectedTask = tasks[0];
-        DirectionsLoader loader = new DirectionsLoader(taskAdapter, mapView, 0,
-                selectedTask.getStartLat(), selectedTask.getStartLong(),
-                selectedTask.getEndLat(), selectedTask.getEndLong());
-        loader.execute();
+
+        //Set up recycler view (and adapter)
+        tasksRecyclerView.setPadding(outerCardPadding, 0, outerCardPadding, 0);
+        tasksRecyclerView.setHasFixedSize(true); //will change when cards can be added/removed
+        TaskRecyclerViewAdapter taskAdapter =
+                new TaskRecyclerViewAdapter(tasks, MATERIAL_COLORS, this, cardWidth);
+        tasksRecyclerView.setAdapter(taskAdapter);
 
 
         //Setup scroll listener and focused task listeners
@@ -115,7 +103,7 @@ public class TasksAndMapActivity extends FragmentActivity {
 
 
         //Start calculations for task indicator drawing
-        if (!singleTask) {
+        if (tasks.length > 3) { //don't show task indicator for few items
             TaskIndicatorDecoration taskIndicatorDecoration = new TaskIndicatorDecoration(MATERIAL_COLORS,
                     tasks.length, screenWidth, screenDensity);
             tasksRecyclerView.addItemDecoration(taskIndicatorDecoration);

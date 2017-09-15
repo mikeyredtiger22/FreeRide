@@ -32,11 +32,9 @@ import java.util.List;
 
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
-import spikey.com.freeride.directions.DirectionsLoader;
 
 public class MapView implements
         OnMapReadyCallback, //When google map is loaded and ready to be used
-        DirectionsLoader.TaskPathLoadedCallback, //When task directions have been loaded
         TaskScrollListener.FocusedTaskListener, //When focused task on screen changes
         CompoundButton.OnCheckedChangeListener, //When 'show all markers' switch is changed
         OnSuccessListener<Location>,  //When users location is returned
@@ -56,7 +54,6 @@ public class MapView implements
     private final RecyclerView recyclerView; //only used to get recycler view height at runtime
     private final Task[] tasks;
 
-    private String[] taskEncodedPaths;
     private boolean showAllMarkers;
     private GoogleMap googleMap;
     private int FOCUSED_TASK_POS;
@@ -66,7 +63,6 @@ public class MapView implements
         this.context = context;
         this.location = LocationServices.getFusedLocationProviderClient(context);
         this.tasks = tasks;
-        this.taskEncodedPaths = new String[tasks.length];
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.recyclerView = recyclerView;
     }
@@ -134,24 +130,13 @@ public class MapView implements
         return BitmapDescriptorFactory.defaultMarker(hsv[0]);
     }
 
-
-    @Override
-    public void onPathLoaded(String encodedPath, int taskPosition) {
-        taskEncodedPaths[taskPosition] = encodedPath;
-
-        //Directions are for current task on screen, add directly to map
-        if (FOCUSED_TASK_POS == taskPosition) {
-            addCurrentTaskDirectionsToMap();
-        }
-    }
-
     private void addCurrentTaskDirectionsToMap() {
         if (googleMap == null) {
             Log.d(TAG, "Map not ready for directions");
             return;
         }
 
-        String taskEncodedPath = taskEncodedPaths[FOCUSED_TASK_POS];
+        String taskEncodedPath = tasks[FOCUSED_TASK_POS].getDirectionsPath();
         if (taskEncodedPath == null) {
             Log.d(TAG, "Selected task directions not loaded.");
             return;

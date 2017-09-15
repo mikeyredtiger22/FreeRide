@@ -25,7 +25,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@id/task_loading_icon"
             android:paddingTop="12dp"
             android:paddingStart="16dp"
             android:textStyle="bold"
@@ -37,7 +36,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@id/task_incentive"
-            android:layout_toLeftOf="@id/task_loading_icon"
             android:paddingStart="16dp"
             tools:text="Start: Start Lane" />
 
@@ -59,7 +57,7 @@
             android:layout_below="@id/task_end_location"
             android:layout_above="@id/task_more_info_button"
             android:paddingStart="16dp"
-            tools:text="Time estimate: 37 minutes"/>
+            tools:text="Duration estimate: 37 minutes"/>
 
 
 
@@ -97,13 +95,6 @@
             android:layout_marginBottom="2dp"
             android:textColor="@android:color/white"
             android:text="MORE INFO"/>
-
-        <ProgressBar
-            android:id="@+id/task_loading_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
 </android.support.v7.widget.CardView>
