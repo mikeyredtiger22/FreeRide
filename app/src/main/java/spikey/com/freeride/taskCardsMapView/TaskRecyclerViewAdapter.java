@@ -54,17 +54,19 @@ public class TaskRecyclerViewAdapter
         holder.taskCardView.setCardBackgroundColor(taskColor);
         holder.taskIncentiveText.setText(String.format("%s %s",
                 context.getString(R.string.points_colon), task.getIncentive()));
+        holder.cardFirstLine.setText(String.format("%s %s",
+                context.getString(R.string.start_colon), task.getStartAddress()));
 
-        if (task.getRouteData() != null) {
-            holder.taskStartLocText.setText(String.format("%s %s",
-                    context.getString(R.string.start_colon), task.getRouteData().startAddress));
-            holder.taskEndLocText.setText(String.format("%s %s",
-                    context.getString(R.string.end_colon), task.getRouteData().endAddress));
-            holder.taskDurationText.setText(String.format("%s %s",
-                    context.getString(R.string.duration_colon), task.getRouteData().duration.humanReadable));
+        if (!task.getOneLocation()) {
+            holder.cardSecondLine.setText(String.format("%s %s",
+                    context.getString(R.string.end_colon), task.getEndAddress()));
+            holder.cardthirdLine.setText(String.format("%s %s",
+                    context.getString(R.string.duration_colon), task.getDirectionsDuration()));
         } else {
-            //No directions for this task
-            holder.taskStartLocText.setText(R.string.directions_cant_be_loaded);
+            holder.cardSecondLine.setText(String.format("%s %s",
+                    context.getString(R.string.title_colon), task.getTitle()));
+            holder.cardthirdLine.setText(String.format("%s %s",
+                    context.getString(R.string.desc_colon), task.getDescription()));
         }
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
@@ -101,22 +103,21 @@ public class TaskRecyclerViewAdapter
     class TaskViewHolder extends RecyclerView.ViewHolder {
 
         CardView taskCardView;
-        TextView taskStartLocText;
-        TextView taskEndLocText;
-        TextView taskDurationText;
         TextView taskIncentiveText;
+        TextView cardFirstLine;
+        TextView cardSecondLine;
+        TextView cardthirdLine;
         Button taskAcceptButton;
         Button taskDismissButton;
         Button taskMoreInfoButton;
 
         public TaskViewHolder(View itemView) {
             super(itemView);
-
-            this.taskCardView = itemView.findViewById(R.id.task_card);
-            taskStartLocText = itemView.findViewById(R.id.task_start_location);
-            taskEndLocText = itemView.findViewById(R.id.task_end_location);
-            taskDurationText = itemView.findViewById(R.id.task_duration);
+            taskCardView = itemView.findViewById(R.id.task_card);
             taskIncentiveText = itemView.findViewById(R.id.task_incentive);
+            cardFirstLine = itemView.findViewById(R.id.card_first_line);
+            cardSecondLine = itemView.findViewById(R.id.card_second_line);
+            cardthirdLine = itemView.findViewById(R.id.card_third_line);
             taskAcceptButton = itemView.findViewById(R.id.task_accept_button);
             taskDismissButton = itemView.findViewById(R.id.task_dismiss_button);
             taskMoreInfoButton = itemView.findViewById(R.id.task_more_info_button);

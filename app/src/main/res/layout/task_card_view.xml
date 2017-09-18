@@ -12,6 +12,10 @@
     android:layout_marginEnd="8dp"
     android:layout_marginBottom="8dp"
     android:layout_marginTop="13dp"
+    app:contentPaddingLeft="16dp"
+    app:contentPaddingRight="4dp"
+    app:contentPaddingTop="12dp"
+    app:contentPaddingBottom="2dp"
     app:cardBackgroundColor="@color/colorAccent">
 
     <RelativeLayout
@@ -25,38 +29,36 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:paddingTop="12dp"
-            android:paddingStart="16dp"
             android:textStyle="bold"
             tools:text="5000 Points" />
 
         <TextView
-            android:id="@+id/task_start_location"
+            android:id="@+id/card_first_line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@id/task_incentive"
-            android:paddingStart="16dp"
+            android:paddingRight="4dp"
             tools:text="Start: Start Lane" />
 
         <TextView
-            android:id="@+id/task_end_location"
+            android:id="@+id/card_second_line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@id/task_start_location"
-            android:paddingStart="16dp"
+            android:layout_below="@id/card_first_line"
+            android:paddingRight="4dp"
             tools:text="End: End Avenue" />
 
 
         <TextView
-            android:id="@+id/task_duration"
+            android:id="@+id/card_third_line"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@id/task_end_location"
+            android:layout_below="@id/card_second_line"
             android:layout_above="@id/task_more_info_button"
-            android:paddingStart="16dp"
+            android:paddingRight="4dp"
             tools:text="Duration estimate: 37 minutes"/>
 
 
@@ -68,8 +70,6 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             style="@style/ButtonColored"
-            android:layout_marginEnd="4dp"
-            android:layout_marginBottom="2dp"
             android:textColor="@android:color/white"
             android:text="ACCEPT"/>
 
@@ -80,7 +80,6 @@
             android:layout_alignParentBottom="true"
             android:layout_toStartOf="@id/task_accept_button"
             style="@style/ButtonColored"
-            android:layout_marginBottom="2dp"
             android:textColor="@android:color/white"
             android:text="DISMISS"/>
 
@@ -91,8 +90,6 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             style="@style/ButtonFlat"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="2dp"
             android:textColor="@android:color/white"
             android:text="MORE INFO"/>
 

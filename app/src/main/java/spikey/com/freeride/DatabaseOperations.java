@@ -21,7 +21,7 @@ public class DatabaseOperations {
 
     private static final String TAG = DatabaseOperations.class.getSimpleName();
 
-    private static boolean connected;
+    public static boolean connected;
     private static final DatabaseReference mDatabaseUserTaskMessages =
             FirebaseDatabase.getInstance().getReference(VALUES.DB_MESSAGES_PATH);
     private static final DatabaseReference oneLocTasksRef =
@@ -115,7 +115,7 @@ public class DatabaseOperations {
     /**
      * Sends data (userId) to database to check connection / reconnect to database
      */
-    public static void databaseMessageTest() {
+    public static boolean databaseMessageTest() {
         connectedToDatabase();
         DatabaseReference databaseRef = FirebaseDatabase.getInstance()
                 .getReference().child("ConnectTest").push();
@@ -123,6 +123,7 @@ public class DatabaseOperations {
         databaseRef.child("userId").setValue(userId);
         databaseRef.child("time").setValue(LocalDateTime.now().toString());
         Log.d(TAG, "DB TEST: " + databaseRef);
+        return connected;
     }
 
     /**

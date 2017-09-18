@@ -1,14 +1,17 @@
 package spikey.com.freeride;
-import com.google.maps.model.DirectionsLeg;
+
 import org.joda.time.LocalDateTime;
 
 public class Task {
 
     private String taskId;
+    private Boolean oneLocation;
     private Double startLat;
     private Double startLong;
     private Double endLat;
     private Double endLong;
+    private String startAddress;
+    private String endAddress;
     private LocalDateTime creationLocalDateTime;
     private LocalDateTime expirationLocalDateTime;
     private String title;
@@ -16,18 +19,22 @@ public class Task {
     private String state;
     private String user;
     private String directionsPath;
-    private DirectionsLeg routeData;
+    private String directionsDistance;
+    private String directionsDuration;
     private Integer incentive;
 
-    public Task(Double startLat, Double startLong,
-                Double endLat, Double endLong,
+    public Task(Boolean oneLocation, Double startLat, Double startLong, Double endLat, Double endLong,
+                String startAddress, String endAddress,
                 LocalDateTime creationLocalDateTime, LocalDateTime expirationLocalDateTime,
                 String title, String description, String state, String user,
-                String directionsPath, DirectionsLeg routeData, Integer incentive) {
+                String directionsPath, String directionsDistance, String directionsDuration, Integer incentive) {
+        this.oneLocation = oneLocation;
         this.startLat = startLat;
         this.startLong = startLong;
         this.endLat = endLat;
         this.endLong = endLong;
+        this.startAddress = startAddress;
+        this.endAddress = endAddress;
         this.creationLocalDateTime = creationLocalDateTime;
         this.expirationLocalDateTime = expirationLocalDateTime;
         this.title = title;
@@ -35,7 +42,8 @@ public class Task {
         this.state = state;
         this.user = user;
         this.directionsPath = directionsPath;
-        this.routeData = routeData;
+        this.directionsDistance = directionsDistance;
+        this.directionsDuration = directionsDuration;
         this.incentive = incentive;
     }
 
@@ -49,6 +57,14 @@ public class Task {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    public Boolean getOneLocation() {
+        return oneLocation;
+    }
+
+    public void setOneLocation(Boolean oneLocation) {
+        this.oneLocation = oneLocation;
     }
 
     public Double getStartLat() {
@@ -81,6 +97,22 @@ public class Task {
 
     public void setEndLong(Double endLong) {
         this.endLong = endLong;
+    }
+
+    public String getStartAddress() {
+        return startAddress;
+    }
+
+    public void setStartAddress(String startAddress) {
+        this.startAddress = startAddress;
+    }
+
+    public String getEndAddress() {
+        return endAddress;
+    }
+
+    public void setEndAddress(String endAddress) {
+        this.endAddress = endAddress;
     }
 
     public LocalDateTime getCreationLocalDateTime() {
@@ -131,20 +163,28 @@ public class Task {
         this.user = user;
     }
 
-    public DirectionsLeg getRouteData() {
-        return routeData;
-    }
-
-    public void setRouteData(DirectionsLeg routeData) {
-        this.routeData = routeData;
-    }
-
     public String getDirectionsPath() {
         return directionsPath;
     }
 
     public void setDirectionsPath(String directionsPath) {
         this.directionsPath = directionsPath;
+    }
+
+    public String getDirectionsDistance() {
+        return directionsDistance;
+    }
+
+    public void setDirectionsDistance(String directionsDistance) {
+        this.directionsDistance = directionsDistance;
+    }
+
+    public String getDirectionsDuration() {
+        return directionsDuration;
+    }
+
+    public void setDirectionsDuration(String directionsDuration) {
+        this.directionsDuration = directionsDuration;
     }
 
     public Integer getIncentive() {

@@ -129,21 +129,4 @@
         android:textSize="18sp"
         tools:text="Task_distance" />
 
-
-    <TextView
-        android:id="@+id/task_details_color"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@id/task_details_distance"
-        android:text="Color " />
-    <View
-        android:id="@+id/task_details_color_block"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="8dp"
-        android:layout_toEndOf="@id/task_details_color"
-        android:layout_alignBottom="@id/task_details_color"
-        android:background="@color/colorAccent"/>
-
 </RelativeLayout>

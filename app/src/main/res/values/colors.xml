@@ -6,6 +6,7 @@
     <color name="colorBlueDark">#002f98</color>
     <color name="colorGreenDark">#00aa41</color>
 
+    <color name="statusBar">#dd404040</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
 

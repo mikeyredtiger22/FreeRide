@@ -8,6 +8,9 @@
     <string name="end_colon">End:</string>
     <string name="duration_colon">Duration:</string>
     <string name="points_colon">Points:</string>
+    <string name="title_colon">Title:</string>
+    <string name="desc_colon">Description:</string>
+    <string name="location_colon">Location:</string>
     <string name="start">Start</string>
     <string name="end">End</string>
     <string name="limiting_tasks">Limiting to first 30 tasks from %d total.</string>
@@ -17,4 +20,6 @@
     <string name="get_tasks">Get Tasks</string>
     <string name="connected">Connected:</string>
     <string name="database_connect">Database Connect</string>
+    <string name="true_">True</string>
+    <string name="false_">False</string>
 </resources>

@@ -1,6 +1,7 @@
 package spikey.com.freeride.taskCardsMapView;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -44,7 +45,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //getWindow().getDecorView().setBackgroundColor(taskColor);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(taskColor));
         setTaskInfo();
     }
 
@@ -53,24 +54,28 @@ public class TaskDetailsActivity extends AppCompatActivity {
         TextView desc = findViewById(R.id.task_details_desc_info);
         TextView incentive = findViewById(R.id.task_details_incentive_info);
         TextView startLocation = findViewById(R.id.task_details_start_location_info);
+        TextView startLocationLabel = findViewById(R.id.task_details_start_location);
         TextView endLocation = findViewById(R.id.task_details_end_location_info);
+        TextView endLocationLabel = findViewById(R.id.task_details_end_location);
         TextView duration = findViewById(R.id.task_details_duration_info);
+        TextView durationLabel = findViewById(R.id.task_details_duration);
         TextView distance = findViewById(R.id.task_details_distance_info);
-        View colorBlock = findViewById(R.id.task_details_color_block);
+        TextView distanceLabel = findViewById(R.id.task_details_distance);
 
-        title     .setText(task.getTitle());
-        desc      .setText(task.getDescription());
-        incentive .setText(String.valueOf(task.getIncentive()));
-        colorBlock.setBackgroundColor(taskColor);
+        title        .setText(task.getTitle());
+        desc         .setText(task.getDescription());
+        startLocation.setText(task.getStartAddress());
+        incentive    .setText(String.valueOf(task.getIncentive()));
 
-        if (task.getRouteData() != null) {
-            startLocation.setText(task.getRouteData().startAddress);
-            endLocation  .setText(task.getRouteData().endAddress);
-            distance     .setText(task.getRouteData().distance.humanReadable);
-            duration     .setText(task.getRouteData().duration.humanReadable);
+        if (!task.getOneLocation()) {
+            endLocation.setText(task.getEndAddress());
+            distance   .setText(task.getDirectionsDistance());
+            duration   .setText(task.getDirectionsDuration());
         } else {
-            startLocation.setText(String.format("Lat,Long: %s, %s", task.getStartLat(), task.getStartLong()));
-            endLocation  .setText(String.format("Lat,Long: %s, %s", task.getEndLat(), task.getEndLong()));
+            startLocationLabel.setText(R.string.location_colon);
+            endLocationLabel.setVisibility(View.GONE);
+            durationLabel.setVisibility(View.GONE);
+            distanceLabel.setVisibility(View.GONE);
         }
 
     }

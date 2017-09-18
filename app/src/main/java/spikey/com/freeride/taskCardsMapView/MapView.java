@@ -100,17 +100,13 @@ public class MapView implements
         }
 
         Task selectedTask = tasks[FOCUSED_TASK_POS];
-        BitmapDescriptor coloredMarker = getColoredMarker();
-
+        MarkerOptions markerOptions = new MarkerOptions().icon(getColoredMarker());
         LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
-        googleMap.addMarker(new MarkerOptions()
-                .position(startLatLng).icon(coloredMarker).title(context.getString(R.string.start)));
 
         if (selectedTask.getEndLat() != null) {//two location (start and end) task
-
+            googleMap.addMarker(markerOptions.position(startLatLng).title(context.getString(R.string.start)));
             LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
-            googleMap.addMarker(new MarkerOptions()
-                    .position(endLatLng).icon(coloredMarker).title(context.getString(R.string.end)));
+            googleMap.addMarker(markerOptions.position(endLatLng).title(context.getString(R.string.end)));
 
             addCurrentTaskDirectionsToMap();
 
@@ -118,6 +114,7 @@ public class MapView implements
                     .include(startLatLng).include(endLatLng).build();
             googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
         } else {
+            googleMap.addMarker(markerOptions.position(startLatLng));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15));
         }
     }

@@ -66,7 +66,12 @@ public class MainActivity extends AppCompatActivity{
         buttonDbTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseOperations.databaseMessageTest();
+                boolean connected = DatabaseOperations.databaseMessageTest();
+                if (connected) {
+                    connectedValue.setText(R.string.true_);
+                } else {
+                    connectedValue.setText(R.string.false_);
+                }
             }
         });
 
