@@ -1,8 +1,12 @@
 package spikey.com.freeride.taskCardsMapView;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
@@ -24,14 +28,24 @@ import java.util.Arrays;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
-public class TasksAndMapActivity extends FragmentActivity {
+public class TasksAndMapActivity extends FragmentActivity
+        implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = TasksAndMapActivity.class.getSimpleName();
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 8;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
 
         Task[] tasks;
         Intent intent = getIntent();
@@ -120,6 +134,17 @@ public class TasksAndMapActivity extends FragmentActivity {
         SwitchCompat markersSwitch = findViewById(R.id.switch_show_all_markers);
         markersSwitch.setOnCheckedChangeListener(mapView);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE &&
+                // If request is cancelled, the result arrays are empty.
+                (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
+            finishActivity(9);
+        }
     }
 
     public int[] createColors(int amount) {

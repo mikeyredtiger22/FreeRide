@@ -11,4 +11,10 @@
     <string name="start">Start</string>
     <string name="end">End</string>
     <string name="limiting_tasks">Limiting to first 30 tasks from %d total.</string>
+    <string name="searching_tasks">Searching Tasks</string>
+    <string name="one_location_tasks">One Location Tasks</string>
+    <string name="two_location_tasks">Two Location Tasks</string>
+    <string name="get_tasks">Get Tasks</string>
+    <string name="connected">Connected:</string>
+    <string name="database_connect">Database Connect</string>
 </resources>

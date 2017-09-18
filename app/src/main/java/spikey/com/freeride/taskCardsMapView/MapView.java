@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.RecyclerView;
@@ -37,8 +36,7 @@ public class MapView implements
         OnMapReadyCallback, //When google map is loaded and ready to be used
         TaskScrollListener.FocusedTaskListener, //When focused task on screen changes
         CompoundButton.OnCheckedChangeListener, //When 'show all markers' switch is changed
-        OnSuccessListener<Location>,  //When users location is returned
-        ActivityCompat.OnRequestPermissionsResultCallback { //Requesting users location permission
+        OnSuccessListener<Location> { //When users location is returned
 
     private static final String TAG = MapView.class.getSimpleName();
 
@@ -84,10 +82,7 @@ public class MapView implements
 
 
         if (ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            googleMap.setMyLocationEnabled(true);
-        } else {
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(context, "No Location Permission", Toast.LENGTH_SHORT).show();
         }
 
@@ -104,23 +99,27 @@ public class MapView implements
             googleMap.clear(); //removes markers and paths from map
         }
 
-
         Task selectedTask = tasks[FOCUSED_TASK_POS];
-        LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
-        LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
-
         BitmapDescriptor coloredMarker = getColoredMarker();
 
+        LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
         googleMap.addMarker(new MarkerOptions()
                 .position(startLatLng).icon(coloredMarker).title(context.getString(R.string.start)));
-        googleMap.addMarker(new MarkerOptions()
-                .position(endLatLng).icon(coloredMarker).title(context.getString(R.string.end)));
 
-        addCurrentTaskDirectionsToMap();
+        if (selectedTask.getEndLat() != null) {//two location (start and end) task
 
-        LatLngBounds markerBounds = LatLngBounds.builder()
-                .include(startLatLng).include(endLatLng).build();
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
+            LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
+            googleMap.addMarker(new MarkerOptions()
+                    .position(endLatLng).icon(coloredMarker).title(context.getString(R.string.end)));
+
+            addCurrentTaskDirectionsToMap();
+
+            LatLngBounds markerBounds = LatLngBounds.builder()
+                    .include(startLatLng).include(endLatLng).build();
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
+        } else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15));
+        }
     }
 
     private BitmapDescriptor getColoredMarker(){
@@ -186,19 +185,6 @@ public class MapView implements
         if (location == null) {
             Log.d(TAG, "Location null");
             return;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if(grantResults.length == 1
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // We can now safely use the API we requested access
-            } else {
-                // Permission was denied or request was cancelled
-            }
         }
     }
 }

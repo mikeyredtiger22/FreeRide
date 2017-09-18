@@ -24,8 +24,10 @@ public class DatabaseOperations {
     private static boolean connected;
     private static final DatabaseReference mDatabaseUserTaskMessages =
             FirebaseDatabase.getInstance().getReference(VALUES.DB_MESSAGES_PATH);
-    private static final DatabaseReference mDatabaseTasks =
-            FirebaseDatabase.getInstance().getReference(VALUES.TASKS_PATH_DB);
+    private static final DatabaseReference oneLocTasksRef =
+            FirebaseDatabase.getInstance().getReference("tasks/oneLoc");
+    private static final DatabaseReference twoLocTasksRef =
+            FirebaseDatabase.getInstance().getReference("tasks/twoLoc");
 
     /**
      * Store User Task Info in database, to be read by server.
@@ -63,7 +65,7 @@ public class DatabaseOperations {
             return;
         }
 
-        DatabaseReference newMessageRef = mDatabaseTasks.child(taskId);
+        DatabaseReference newMessageRef = oneLocTasksRef.child(taskId);
         Log.d(TAG, "Securing Task: " + taskId);
 
         newMessageRef.runTransaction(new Transaction.Handler() {
@@ -98,12 +100,15 @@ public class DatabaseOperations {
         });
     }
 
+
     /**
-     * Returns all available tasks from database as Json tree / string??
+     * Reads value at database path, returns as snapshot to listener
+     * @param oneLocationTasks true for one location tasks, false for two location (start and end) tasks
+     * @param getAvailableTasksListener given by the calling method
      */
-    public static void getAvailableTasks(ValueEventListener getAvailableTasksListener) {
+    public static void getAvailableTasks(boolean oneLocationTasks, ValueEventListener getAvailableTasksListener) {
         connectedToDatabase();
-        DatabaseReference allTasksRef = mDatabaseTasks;
+        DatabaseReference allTasksRef = oneLocationTasks ? oneLocTasksRef : twoLocTasksRef;
         allTasksRef.addListenerForSingleValueEvent(getAvailableTasksListener);
     }
 

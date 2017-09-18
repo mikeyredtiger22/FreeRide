@@ -1,15 +1,14 @@
 package spikey.com.freeride;
-
 import com.google.maps.model.DirectionsLeg;
 import org.joda.time.LocalDateTime;
 
 public class Task {
 
     private String taskId;
-    private double startLat;
-    private double startLong;
-    private double endLat;
-    private double endLong;
+    private Double startLat;
+    private Double startLong;
+    private Double endLat;
+    private Double endLong;
     private LocalDateTime creationLocalDateTime;
     private LocalDateTime expirationLocalDateTime;
     private String title;
@@ -18,13 +17,13 @@ public class Task {
     private String user;
     private String directionsPath;
     private DirectionsLeg routeData;
-    private double incentive;
+    private Integer incentive;
 
-    public Task(double startLat, double startLong,
-                double endLat, double endLong,
+    public Task(Double startLat, Double startLong,
+                Double endLat, Double endLong,
                 LocalDateTime creationLocalDateTime, LocalDateTime expirationLocalDateTime,
                 String title, String description, String state, String user,
-                String directionsPath, DirectionsLeg routeData, double incentive) {
+                String directionsPath, DirectionsLeg routeData, Integer incentive) {
         this.startLat = startLat;
         this.startLong = startLong;
         this.endLat = endLat;
@@ -52,35 +51,35 @@ public class Task {
         this.taskId = taskId;
     }
 
-    public double getStartLat() {
+    public Double getStartLat() {
         return startLat;
     }
 
-    public void setStartLat(double startLat) {
+    public void setStartLat(Double startLat) {
         this.startLat = startLat;
     }
 
-    public double getStartLong() {
+    public Double getStartLong() {
         return startLong;
     }
 
-    public void setStartLong(double startLong) {
+    public void setStartLong(Double startLong) {
         this.startLong = startLong;
     }
 
-    public double getEndLat() {
+    public Double getEndLat() {
         return endLat;
     }
 
-    public void setEndLat(double endLat) {
+    public void setEndLat(Double endLat) {
         this.endLat = endLat;
     }
 
-    public double getEndLong() {
+    public Double getEndLong() {
         return endLong;
     }
 
-    public void setEndLong(double endLong) {
+    public void setEndLong(Double endLong) {
         this.endLong = endLong;
     }
 
@@ -148,11 +147,11 @@ public class Task {
         this.directionsPath = directionsPath;
     }
 
-    public double getIncentive() {
+    public Integer getIncentive() {
         return incentive;
     }
 
-    public void setIncentive(double incentive) {
+    public void setIncentive(Integer incentive) {
         this.incentive = incentive;
     }
 }

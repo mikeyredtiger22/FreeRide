@@ -7,7 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,10 +28,13 @@ import spikey.com.freeride.taskCardsMapView.TasksAndMapActivity;
 public class MainActivity extends AppCompatActivity{
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 7;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 8;
     private static final String TAG = MainActivity.class.getSimpleName();
-    private TextView resultsTextView;
     private Context context;
+
     private ProgressBar progressCircle;
+    private TextView locationType;
+    private TextView connectedValue;
 
 
     @Override
@@ -42,7 +47,20 @@ public class MainActivity extends AppCompatActivity{
         context = this;
 
         progressCircle = findViewById(R.id.progress_circle);
+        locationType = findViewById(R.id.location_type);
+        connectedValue = findViewById(R.id.connected_value);
 
+        final Switch locationTypeSwitch = findViewById(R.id.location_type_switch);
+        locationTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean on) {
+                if (on) {
+                    locationType.setText(R.string.two_location_tasks);
+                } else {
+                    locationType.setText(R.string.one_location_tasks);
+                }
+            }
+        });
 
         final Button buttonDbTest = findViewById(R.id.button_db_connect);
         buttonDbTest.setOnClickListener(new View.OnClickListener() {
@@ -54,12 +72,12 @@ public class MainActivity extends AppCompatActivity{
 
 
         final Button buttonGetTasks = findViewById(R.id.button_get_tasks);
-        resultsTextView = findViewById(R.id.text_results);
         buttonGetTasks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressCircle.setVisibility(View.VISIBLE);
-                DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
+                boolean oneLocationTasks = !locationTypeSwitch.isChecked();
+                DatabaseOperations.getAvailableTasks(oneLocationTasks, new GetAvailableTasksListener());
             }
         });
 
