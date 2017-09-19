@@ -1,6 +1,7 @@
 package spikey.com.freeride.taskCardsMapView;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -10,7 +11,6 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -29,6 +29,7 @@ import com.google.maps.android.PolyUtil;
 
 import java.util.List;
 
+import spikey.com.freeride.CustomToastMessage;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
@@ -44,10 +45,11 @@ public class MapView implements
     private static final int MAP_PADDING = 150;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 7;
-    private final FusedLocationProviderClient location;
+    private final FusedLocationProviderClient locationProvider;
 
     private final int[] MATERIAL_COLORS;
 
+    private final Activity activity;
     private final Context context;
     private final RecyclerView recyclerView; //only used to get recycler view height at runtime
     private final Task[] tasks;
@@ -57,9 +59,10 @@ public class MapView implements
     private int FOCUSED_TASK_POS;
 
 
-    public MapView(Context context, Task[] tasks, int[] MATERIAL_COLORS, RecyclerView recyclerView) {
-        this.context = context;
-        this.location = LocationServices.getFusedLocationProviderClient(context);
+    public MapView(Activity activity, Task[] tasks, int[] MATERIAL_COLORS, RecyclerView recyclerView) {
+        this.activity = activity;
+        this.context = activity;
+        this.locationProvider = LocationServices.getFusedLocationProviderClient(context);
         this.tasks = tasks;
         this.MATERIAL_COLORS = MATERIAL_COLORS;
         this.recyclerView = recyclerView;
@@ -82,10 +85,19 @@ public class MapView implements
 
         if (ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "No Location Permission", Toast.LENGTH_SHORT).show();
+            CustomToastMessage.show("No Location Permission", activity);
+            /*
+            googleMap.setMyLocationEnabled(false);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            getLocationPermission();
+        }
+             */
+        } else {
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
 
-        location.getLastLocation().addOnSuccessListener(this);
+        locationProvider.getLastLocation().addOnSuccessListener(this);
 
         updateMap();
     }
@@ -102,7 +114,7 @@ public class MapView implements
         MarkerOptions markerOptions = new MarkerOptions().icon(getColoredMarker());
         LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
 
-        if (selectedTask.getEndLat() != null) {//two location (start and end) task
+        if (selectedTask.getEndLat() != null) {//two locationProvider (start and end) task
             googleMap.addMarker(markerOptions.position(startLatLng).title(context.getString(R.string.start)));
             LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
             googleMap.addMarker(markerOptions.position(endLatLng).title(context.getString(R.string.end)));

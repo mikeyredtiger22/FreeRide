@@ -1,5 +1,6 @@
 package spikey.com.freeride;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +12,6 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity{
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 7;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 8;
     private static final String TAG = MainActivity.class.getSimpleName();
+    private Activity activity;
     private Context context;
 
     private ProgressBar progressCircle;
@@ -98,6 +99,10 @@ public class MainActivity extends AppCompatActivity{
                 }catch (Exception ignored){}
             }
         }).start();
+
+        //todo testing toast message sizing
+        CustomToastMessage.show("dfgssdjsbdbdbbdjjbdjbdjbdbjdbjdbjdbjdbjdbjdbjdbjdbjdbjdbjjbdbjdbj", this);
+        CustomToastMessage.show("dfgs\nsdjsb\ndbdbbd\njjbdjbdjb\ndbjdbjdbj\ndbjdbjd\nbjdbjdbj\ndbj", this);
     }
 
     @Override
@@ -130,7 +135,7 @@ public class MainActivity extends AppCompatActivity{
         public void onDataChange(DataSnapshot dataSnapshot) {
             if (!dataSnapshot.hasChildren()) {
                 //No tasks received from server
-                Toast.makeText(context, "No Tasks Available.", Toast.LENGTH_SHORT).show();
+                CustomToastMessage.show("No Tasks Available", activity);
                 progressCircle.setVisibility(View.INVISIBLE);
                 return;
             }

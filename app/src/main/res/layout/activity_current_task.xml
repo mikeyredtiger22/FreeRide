@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="spikey.com.freeride.CurrentTaskActivity">
+    tools:activity="spikey.com.freeride.CurrentTaskActivity">
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline_current"
@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/current_task_map_view"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        tools:context="freeride.spikey.com.freeride.TasksAndMapActivity"
+        tools:activity="freeride.spikey.com.freeride.TasksAndMapActivity"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"

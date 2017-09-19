@@ -1,10 +1,15 @@
 package spikey.com.freeride;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -14,6 +19,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.fatboyindustrial.gsonjodatime.Converters;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,15 +32,18 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.List;
 
 import spikey.com.freeride.taskCardsMapView.TaskDetailsActivity;
 
-public class CurrentTaskActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class CurrentTaskActivity extends AppCompatActivity
+        implements OnMapReadyCallback, OnCompleteListener<Location>{
 
     private static final String TAG = CurrentTaskActivity.class.getSimpleName();
 
@@ -43,7 +53,7 @@ public class CurrentTaskActivity extends AppCompatActivity implements OnMapReady
     private Task task;
     private int taskColor;
     private CardView currentTaskCardView;
-    private int height;
+    private FusedLocationProviderClient locationProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +103,26 @@ public class CurrentTaskActivity extends AppCompatActivity implements OnMapReady
                     getString(R.string.desc_colon), task.getDescription()));
         }
 
+        final Activity activity = this;
         final Context context = this;
+        final OnCompleteListener<Location> getLocation = this;
+
+        taskVerifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(context,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+
+                    locationProvider.getLastLocation().addOnCompleteListener(getLocation);
+
+                } else {
+                    CustomToastMessage.show("Need Location Permission to verify task", activity);
+                    //TODO request user runtime
+                }
+            }
+        });
+
         taskMoreInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,6 +133,8 @@ public class CurrentTaskActivity extends AppCompatActivity implements OnMapReady
                 context.startActivity(openTaskDetails);
             }
         });
+
+        this.locationProvider = LocationServices.getFusedLocationProviderClient(context);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.current_task_map_view);
@@ -121,10 +152,26 @@ public class CurrentTaskActivity extends AppCompatActivity implements OnMapReady
         int height = currentTaskCardView.getHeight() + layoutParams.topMargin + layoutParams.bottomMargin;
         googleMap.setPadding(0, MAP_TOP_PADDING, 0, height);
 
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            CustomToastMessage.show("No Location Permission", this);
+            /*
+            googleMap.setMyLocationEnabled(false);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            getLocationPermission();
+        }
+             */
+        } else {
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        }
+
+        locationProvider.getLastLocation();
+
         MarkerOptions markerOptions = new MarkerOptions().icon(getColoredMarker());
         LatLng startLatLng = new LatLng(task.getStartLat(), task.getStartLong());
 
-        if (task.getEndLat() != null) {//two location (start and end) task
+        if (task.getEndLat() != null) {//two locationProvider (start and end) task
             googleMap.addMarker(markerOptions.position(startLatLng).title(getString(R.string.start)));
             LatLng endLatLng = new LatLng(task.getEndLat(), task.getEndLong());
             googleMap.addMarker(markerOptions.position(endLatLng).title(getString(R.string.end)));
@@ -168,6 +215,29 @@ public class CurrentTaskActivity extends AppCompatActivity implements OnMapReady
             polylineOptions.width(15);
             polylineOptions.color(taskColor);
             googleMap.addPolyline(polylineOptions);
+        }
+    }
+
+    @Override
+    public void onComplete(@NonNull com.google.android.gms.tasks.Task<Location> locationTask) {
+        if (locationTask.isSuccessful()) {
+            Location location = locationTask.getResult();
+            //todo null can be returned from getLastLocation
+            LatLng taskLocation = new LatLng(task.getStartLat(), task.getStartLong());
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+            double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
+                    taskLocation, userLocation);
+            double accuracyMetres = location.getAccuracy();
+            int difference = (int) (taskDistanceMetres - accuracyMetres);
+            if (difference < 10) {
+                CustomToastMessage.show("LOCATION VERIFIED", this);
+            } else {
+                CustomToastMessage.show(String.format(
+                        "You must be %s metres closer to the task location", difference), this);
+            }
+        } else {
+            Log.d(TAG, "Task verification error: " + locationTask.getException());
         }
     }
 }

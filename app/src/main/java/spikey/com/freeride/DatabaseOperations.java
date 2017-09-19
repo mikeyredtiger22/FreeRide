@@ -1,6 +1,7 @@
 package spikey.com.freeride;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -63,16 +64,16 @@ public class DatabaseOperations {
      * Uses a transaction (concurrency safe).
      * transaction is recalled until the user field is set by a user.
      * @param currentTask id for database. whole object for intent
-     * @param context to create current task activity intent in success callback
+     * @param activity to create current task activity intent in success callback and toast message
      */
-    public static void secureTask(final Task currentTask, final Context context, final int taskColor) {
+    public static void secureTask(final Task currentTask, final Activity activity, final int taskColor) {
         final String taskId = currentTask.getTaskId();
         final String userId = FirebaseInstanceId.getInstance().getToken();
         if (!connectedToDatabase()) {
             return;
         }
         final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
-
+        final Context context = activity;
         DatabaseReference allTasksRef = currentTask.getOneLocation() ? oneLocTasksRef : twoLocTasksRef;
         DatabaseReference newMessageRef = allTasksRef.child(taskId);
         Log.d(TAG, "Securing Task: " + taskId);
@@ -91,8 +92,9 @@ public class DatabaseOperations {
                         taskJson = gson.toJson(task);
                         mutableData.setValue(taskJson);
                         Log.d(TAG, "Set user on Task: " + taskId + " set userId: " + userId);
-                    } else {
+                    } else if (!task.getUser().equals(userId)){
                         Log.d(TAG, "Task: " + taskId + " already taken by user: " + task.getUser());
+                        return Transaction.abort();
                     }
                     return Transaction.success(mutableData);
                 }
@@ -109,7 +111,8 @@ public class DatabaseOperations {
                     currentTaskIntent.putExtra("color", taskColor);
                     context.startActivity(currentTaskIntent);
                 } else {
-                    Log.d(TAG, "Error on securing task : " + databaseError);
+                    Log.d(TAG, "Error on securing task");
+                    CustomToastMessage.show("Sorry, this task has been accepted by another user", activity);
                 }
             }
         });

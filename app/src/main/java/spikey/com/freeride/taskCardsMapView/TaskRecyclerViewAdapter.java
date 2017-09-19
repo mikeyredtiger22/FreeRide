@@ -1,6 +1,6 @@
 package spikey.com.freeride.taskCardsMapView;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -25,15 +25,15 @@ public class TaskRecyclerViewAdapter
 
     private Task[] tasks;
     private int[] MATERIAL_COLORS;
-    private Context context;
+    private Activity activity;
     private int taskCardWidth;
 
     public TaskRecyclerViewAdapter(Task[] tasks, int[] MATERIAL_COLORS,
-                                   Context context, int taskCardWidth) {
+                                   Activity activity, int taskCardWidth) {
         super();
         this.tasks = tasks;
         this.MATERIAL_COLORS = MATERIAL_COLORS;
-        this.context = context;
+        this.activity = activity;
         this.taskCardWidth = taskCardWidth;
     }
 
@@ -53,26 +53,26 @@ public class TaskRecyclerViewAdapter
 
         holder.taskCardView.setCardBackgroundColor(taskColor);
         holder.taskIncentiveText.setText(String.format("%s %s",
-                context.getString(R.string.points_colon), task.getIncentive()));
+                activity.getString(R.string.points_colon), task.getIncentive()));
         holder.cardFirstLine.setText(String.format("%s %s",
-                context.getString(R.string.start_colon), task.getStartAddress()));
+                activity.getString(R.string.start_colon), task.getStartAddress()));
 
         if (!task.getOneLocation()) {
             holder.cardSecondLine.setText(String.format("%s %s",
-                    context.getString(R.string.end_colon), task.getEndAddress()));
+                    activity.getString(R.string.end_colon), task.getEndAddress()));
             holder.cardThirdLine.setText(String.format("%s %s",
-                    context.getString(R.string.duration_colon), task.getDirectionsDuration()));
+                    activity.getString(R.string.duration_colon), task.getDirectionsDuration()));
         } else {
             holder.cardSecondLine.setText(String.format("%s %s",
-                    context.getString(R.string.title_colon), task.getTitle()));
+                    activity.getString(R.string.title_colon), task.getTitle()));
             holder.cardThirdLine.setText(String.format("%s %s",
-                    context.getString(R.string.desc_colon), task.getDescription()));
+                    activity.getString(R.string.desc_colon), task.getDescription()));
         }
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseOperations.secureTask(task, context, taskColor);
+                DatabaseOperations.secureTask(task, activity, taskColor);
             }
         });
 
@@ -86,10 +86,10 @@ public class TaskRecyclerViewAdapter
             @Override
             public void onClick(View view) {
                 Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
-                Intent openTaskDetails = new Intent(context, TaskDetailsActivity.class);
+                Intent openTaskDetails = new Intent(activity, TaskDetailsActivity.class);
                 openTaskDetails.putExtra("task", gson.toJson(task));
                 openTaskDetails.putExtra("color", taskColor);
-                context.startActivity(openTaskDetails);
+                activity.startActivity(openTaskDetails);
             }
         });
     }

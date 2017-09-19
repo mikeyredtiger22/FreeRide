@@ -12,11 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -25,6 +20,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.Arrays;
 
+import spikey.com.freeride.CustomToastMessage;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
@@ -67,18 +63,7 @@ public class TasksAndMapActivity extends FragmentActivity
 
         //Limit to first 30 tasks if too many
         if (tasks.length > 30) {
-            View toastView = getLayoutInflater().inflate(R.layout.custom_toast_message_layout,
-                    (ViewGroup) findViewById(R.id.custom_toast_root_view));
-
-            TextView text = toastView.findViewById(R.id.toast_message);
-            text.setText(String.format(getString(R.string.limiting_tasks), tasks.length));
-
-            Toast toast = new Toast(this);
-            toast.setView(toastView);
-            toast.setGravity(Gravity.BOTTOM, 0, 50);
-            toast.setDuration(Toast.LENGTH_LONG);
-            toast.show();
-
+            CustomToastMessage.show(String.format(getString(R.string.limiting_tasks), tasks.length), this);
             tasks = Arrays.copyOfRange(tasks, 0, 30);
         }
 
