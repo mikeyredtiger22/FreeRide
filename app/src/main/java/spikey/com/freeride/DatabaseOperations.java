@@ -1,8 +1,11 @@
 package spikey.com.freeride;
 
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
+import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -12,6 +15,8 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.joda.time.LocalDateTime;
 
@@ -57,28 +62,34 @@ public class DatabaseOperations {
      * Attempts to set the user field of task to this user's Id.
      * Uses a transaction (concurrency safe).
      * transaction is recalled until the user field is set by a user.
-     * @param taskId of task to secure
+     * @param currentTask id for database. whole object for intent
+     * @param context to create current task activity intent in success callback
      */
-    public static void secureTask(final String taskId) {
+    public static void secureTask(final Task currentTask, final Context context, final int taskColor) {
+        final String taskId = currentTask.getTaskId();
         final String userId = FirebaseInstanceId.getInstance().getToken();
         if (!connectedToDatabase()) {
             return;
         }
+        final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
 
-        DatabaseReference newMessageRef = oneLocTasksRef.child(taskId);
+        DatabaseReference allTasksRef = currentTask.getOneLocation() ? oneLocTasksRef : twoLocTasksRef;
+        DatabaseReference newMessageRef = allTasksRef.child(taskId);
         Log.d(TAG, "Securing Task: " + taskId);
 
         newMessageRef.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 Log.d(TAG, "pre-transaction Data value: " + mutableData);
-                Task task = mutableData.getValue(Task.class);
-                if (task == null) {
+                String taskJson = mutableData.getValue(String.class);
+                if (taskJson == null) {
                     return Transaction.success(mutableData);
                 } else {
+                    Task task = gson.fromJson(taskJson, Task.class);
                     if (task.getUser() == null) {
                         task.setUser(userId);
-                        mutableData.setValue(task);
+                        taskJson = gson.toJson(task);
+                        mutableData.setValue(taskJson);
                         Log.d(TAG, "Set user on Task: " + taskId + " set userId: " + userId);
                     } else {
                         Log.d(TAG, "Task: " + taskId + " already taken by user: " + task.getUser());
@@ -89,10 +100,14 @@ public class DatabaseOperations {
 
 
             @Override
-            public void onComplete(DatabaseError databaseError, boolean error,
+            public void onComplete(DatabaseError databaseError, boolean committed,
                                    DataSnapshot dataSnapshot) {
-                if (error) {
-                    Log.d(TAG, "Transaction completed");
+                if (committed) {
+                    Log.d(TAG, "Transaction completed successfully");
+                    Intent currentTaskIntent = new Intent(context, CurrentTaskActivity.class);
+                    currentTaskIntent.putExtra("task", dataSnapshot.getValue(String.class));
+                    currentTaskIntent.putExtra("color", taskColor);
+                    context.startActivity(currentTaskIntent);
                 } else {
                     Log.d(TAG, "Error on securing task : " + databaseError);
                 }

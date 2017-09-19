@@ -60,20 +60,19 @@ public class TaskRecyclerViewAdapter
         if (!task.getOneLocation()) {
             holder.cardSecondLine.setText(String.format("%s %s",
                     context.getString(R.string.end_colon), task.getEndAddress()));
-            holder.cardthirdLine.setText(String.format("%s %s",
+            holder.cardThirdLine.setText(String.format("%s %s",
                     context.getString(R.string.duration_colon), task.getDirectionsDuration()));
         } else {
             holder.cardSecondLine.setText(String.format("%s %s",
                     context.getString(R.string.title_colon), task.getTitle()));
-            holder.cardthirdLine.setText(String.format("%s %s",
+            holder.cardThirdLine.setText(String.format("%s %s",
                     context.getString(R.string.desc_colon), task.getDescription()));
         }
 
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseOperations.secureTask(task.getTaskId());
-                //confirmation -> active task screen
+                DatabaseOperations.secureTask(task, context, taskColor);
             }
         });
 
@@ -106,7 +105,7 @@ public class TaskRecyclerViewAdapter
         TextView taskIncentiveText;
         TextView cardFirstLine;
         TextView cardSecondLine;
-        TextView cardthirdLine;
+        TextView cardThirdLine;
         Button taskAcceptButton;
         Button taskDismissButton;
         Button taskMoreInfoButton;
@@ -117,7 +116,7 @@ public class TaskRecyclerViewAdapter
             taskIncentiveText = itemView.findViewById(R.id.task_incentive);
             cardFirstLine = itemView.findViewById(R.id.card_first_line);
             cardSecondLine = itemView.findViewById(R.id.card_second_line);
-            cardthirdLine = itemView.findViewById(R.id.card_third_line);
+            cardThirdLine = itemView.findViewById(R.id.card_third_line);
             taskAcceptButton = itemView.findViewById(R.id.task_accept_button);
             taskDismissButton = itemView.findViewById(R.id.task_dismiss_button);
             taskMoreInfoButton = itemView.findViewById(R.id.task_more_info_button);

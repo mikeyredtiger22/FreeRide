@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
@@ -13,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
@@ -22,24 +24,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".taskCardsMapView.TasksAndMapActivity"
             android:label="@string/title_activity_maps"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".taskCardsMapView.TaskDetailsActivity"
-            android:label="Task Details"
+            android:label="@string/task_details"
             android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"
+            />
+
+        <activity android:name=".CurrentTaskActivity"
+            android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".cloudmessaging.CloudMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <service android:name=".cloudmessaging.CloudInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />

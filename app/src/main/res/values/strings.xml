@@ -22,4 +22,5 @@
     <string name="database_connect">Database Connect</string>
     <string name="true_">True</string>
     <string name="false_">False</string>
+    <string name="task_details">Task Details</string>
 </resources>

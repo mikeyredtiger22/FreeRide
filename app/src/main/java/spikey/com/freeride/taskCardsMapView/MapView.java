@@ -80,7 +80,6 @@ public class MapView implements
         // bottom is because of the task cards at the bottom
         googleMap.setPadding(0, MAP_TOP_PADDING, 0, recyclerView.getHeight());
 
-
         if (ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(context, "No Location Permission", Toast.LENGTH_SHORT).show();
