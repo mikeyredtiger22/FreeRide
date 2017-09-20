@@ -17,6 +17,7 @@ import com.google.gson.GsonBuilder;
 import spikey.com.freeride.DatabaseOperations;
 import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
+import spikey.com.freeride.TaskDetailsActivity;
 
 public class TaskRecyclerViewAdapter
         extends RecyclerView.Adapter<TaskRecyclerViewAdapter.TaskViewHolder>{

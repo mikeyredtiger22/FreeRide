@@ -1,4 +1,4 @@
-package spikey.com.freeride.taskCardsMapView;
+package spikey.com.freeride;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -11,9 +11,6 @@ import android.widget.TextView;
 import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import spikey.com.freeride.R;
-import spikey.com.freeride.Task;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 

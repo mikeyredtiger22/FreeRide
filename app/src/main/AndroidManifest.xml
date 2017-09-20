@@ -32,7 +32,7 @@
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name=".taskCardsMapView.TaskDetailsActivity"
+            android:name=".TaskDetailsActivity"
             android:label="@string/task_details"
             android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
             android:screenOrientation="portrait"

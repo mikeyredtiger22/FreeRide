@@ -40,8 +40,6 @@ import com.google.maps.android.SphericalUtil;
 
 import java.util.List;
 
-import spikey.com.freeride.taskCardsMapView.TaskDetailsActivity;
-
 public class CurrentTaskActivity extends AppCompatActivity
         implements OnMapReadyCallback, OnCompleteListener<Location>{
 

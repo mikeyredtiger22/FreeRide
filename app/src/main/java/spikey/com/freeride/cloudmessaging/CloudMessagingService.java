@@ -152,15 +152,6 @@ public class CloudMessagingService extends FirebaseMessagingService {
         // todo use newer Gson serializer Task newTask = new Gson().fromJson(taskData, Task.class);
         //Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification, taskData);
-//        secureTask(taskId);
-    }
-
-    /**
-     * Attempts to change the user field of a task to this user's Id.
-     * @param taskId
-     */
-    private void secureTask(String taskId) {
-//        DatabaseOperations.secureTask(taskId);
     }
 
     /**

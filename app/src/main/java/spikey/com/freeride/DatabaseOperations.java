@@ -29,7 +29,7 @@ public class DatabaseOperations {
 
     public static boolean connected;
     private static final DatabaseReference mDatabaseUserTaskMessages =
-            FirebaseDatabase.getInstance().getReference(VALUES.DB_MESSAGES_PATH);
+            FirebaseDatabase.getInstance().getReference("messages/userTaskInfo");
     private static final DatabaseReference oneLocTasksRef =
             FirebaseDatabase.getInstance().getReference("tasks/oneLoc");
     private static final DatabaseReference twoLocTasksRef =

@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity{
 
         checkPlayServices();
         FirebaseMessaging.getInstance().subscribeToTopic("test");
+        activity = this;
         context = this;
 
         progressCircle = findViewById(R.id.progress_circle);
@@ -100,9 +101,7 @@ public class MainActivity extends AppCompatActivity{
             }
         }).start();
 
-        //todo testing toast message sizing
-        CustomToastMessage.show("dfgssdjsbdbdbbdjjbdjbdjbdbjdbjdbjdbjdbjdbjdbjdbjdbjdbjdbjjbdbjdbj", this);
-        CustomToastMessage.show("dfgs\nsdjsb\ndbdbbd\njjbdjbdjb\ndbjdbjdbj\ndbjdbjd\nbjdbjdbj\ndbj", this);
+
     }
 
     @Override
