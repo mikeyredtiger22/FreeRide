@@ -26,15 +26,15 @@ public class CloudMessagingService extends FirebaseMessagingService {
     private static final String TAG = CloudMessagingService.class.getSimpleName();
 
     @Override
-    public void onMessageSent(String s) {
-        super.onMessageSent(s);
-        Log.d(TAG, "Sent message, ID: " + s);
+    public void onMessageSent(String messageId) {
+        super.onMessageSent(messageId);
+        Log.d(TAG, "Sent message, ID: " + messageId);
     }
 
     @Override
-    public void onSendError(String s, Exception e) {
-        super.onSendError(s, e);
-        Log.d(TAG, "Send error: " + s + ",  Error: " + e);
+    public void onSendError(String messageId, Exception exception) {
+        super.onSendError(messageId, exception);
+        Log.d(TAG, "Send error: " + messageId + ",  Error: " + exception);
     }
 
     @Override
@@ -48,16 +48,9 @@ public class CloudMessagingService extends FirebaseMessagingService {
 
             String messageType = messageData.get("messageType");
             switch (messageType) {
-                case "reply-test":
-                    String count = messageData.get("count");
-                    replyToTestMessage(count, remoteMessage.getMessageId());
-                    break;
                 case "new-task":
-                    //Task task = new Gson().fromJson(messageData.get("task"), Task.class);
                     // (much later) calculate location and Reputation Score
-                    String userId = FirebaseInstanceId.getInstance().getToken();
-                    Log.d(TAG, "FB token: " + userId);
-                    replyToNewTaskMessageViaDatabase(messageData.get("taskId"), userId);
+                    replyToNewTaskMessageViaDatabase(messageData.get("taskId"));
                     break;
                 case "new-task-notification":
                     newTaskNotification(remoteMessage.getNotification(),
@@ -67,69 +60,13 @@ public class CloudMessagingService extends FirebaseMessagingService {
         }
     }
 
-
-    //All message types received as intent (after OnMessageReceived - if called)
-    @Override
-    public void handleIntent(Intent intent) {
-        super.handleIntent(intent);
-        /*
-        Bundle bundleExtras = intent.getExtras();
-        String extras = "";
-        if (bundleExtras != null) {
-            extras = bundleExtras.toString();
-        }
-        Log.d(TAG, "Intent extras: " + extras);*/
-    }
-
-    /**
-     * Server and client sending message back and forth, incrementing a counter.
-     * Used to test connectivity between server and client, see where messaging breaks
-     * and see how long messages take to get sent.
-     * The client end sets a limit to the counter value.
-     * @param count of received message
-     * @param messageId to send message to (server/fcm)
-     */
-    public void replyToTestMessage(String count, String messageId) {
-        final int countVal = Integer.parseInt(count) +1;
-        if (countVal > 8) {
-            return;
-        }
-        Map<String, String> dataPayload = new HashMap<>();
-        dataPayload.put("messageType", "reply-test");
-        dataPayload.put("count", String.valueOf(countVal));
-
-        SendMessageTask sendMessageTask = new SendMessageTask(dataPayload, messageId);
-        sendMessageTask.execute(null, null, null);
-    }
-
-    /**
-     * DEPRECATED - Not used anymore because of unreliable upstream messaging (from client)
-     * Will be useful again if upstream messaging becomes reliable
-     * @param locationScore
-     * @param reputationScore
-     * @param messageId
-     */
-    @Deprecated
-    public void replyToNewTaskMessage(String locationScore, String reputationScore, String messageId) {
-
-        Map<String, String> dataPayload = new HashMap<>();
-        dataPayload.put("messageType", "new-task-reply");
-        dataPayload.put("locationScore", locationScore);
-        dataPayload.put("reputationScore", reputationScore);
-
-        //VERY UNRELIABLE UPSTREAM MESSAGING.
-        SendMessageTask sendMessageTask = new SendMessageTask(dataPayload, messageId);
-        sendMessageTask.execute(null, null, null);
-        Log.d(TAG, "Sent user data reply to new task message");
-    }
-
     /**
      * Sends User Task Info (Map) to database. Info is stored and read by the server
      * Client adds their location score (depending on task and user location)
      * @param taskId of task
-     * @param userId of user
      */
-    public void replyToNewTaskMessageViaDatabase(String taskId, String userId) {
+    public void replyToNewTaskMessageViaDatabase(String taskId) {
+        String userId = FirebaseInstanceId.getInstance().getToken();
 
         Map<String, Object> dataPayload = new HashMap<>();
         dataPayload.put("messageType", "new-task-reply");
@@ -149,8 +86,6 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * @param taskId of task
      */
     private void newTaskNotification(RemoteMessage.Notification notification, String taskData, String taskId) {
-        // todo use newer Gson serializer Task newTask = new Gson().fromJson(taskData, Task.class);
-        //Log.d(TAG, "Task Object: " + newTask.getTitle() + ", " + newTask.getDescription());
         createNotification(notification, taskData);
     }
 
@@ -160,6 +95,10 @@ public class CloudMessagingService extends FirebaseMessagingService {
      * @param taskData from server
      */
     private void createNotification(RemoteMessage.Notification notificationData, String taskData) {
+
+
+        // todo use newer Gson serializer Task newTask = new Gson().fromJson(taskData, Task.class);
+
         //TODO customise notification, add intent to open task details
         Intent intent = new Intent(this, TasksAndMapActivity.class);
         intent.putExtra("task", taskData);

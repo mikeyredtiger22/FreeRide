@@ -218,24 +218,27 @@ public class CurrentTaskActivity extends AppCompatActivity
 
     @Override
     public void onComplete(@NonNull com.google.android.gms.tasks.Task<Location> locationTask) {
-        if (locationTask.isSuccessful()) {
-            Location location = locationTask.getResult();
-            //todo null can be returned from getLastLocation
-            LatLng taskLocation = new LatLng(task.getStartLat(), task.getStartLong());
-            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-            double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
-                    taskLocation, userLocation);
-            double accuracyMetres = location.getAccuracy();
-            int difference = (int) (taskDistanceMetres - accuracyMetres);
-            if (difference < 10) {
-                CustomToastMessage.show("LOCATION VERIFIED", this);
-            } else {
-                CustomToastMessage.show(String.format(
-                        "You must be %s metres closer to the task location", difference), this);
-            }
-        } else {
+        if (!locationTask.isSuccessful()) {
             Log.d(TAG, "Task verification error: " + locationTask.getException());
+        } else {
+            Location location = locationTask.getResult();
+            if (location == null) {
+                CustomToastMessage.show("Please turn on location to verify task", this);
+            } else {
+                LatLng taskLocation = new LatLng(task.getStartLat(), task.getStartLong());
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
+                        taskLocation, userLocation);
+                double accuracyMetres = location.getAccuracy();
+                int difference = (int) (taskDistanceMetres - accuracyMetres);
+                if (difference < 10) {
+                    CustomToastMessage.show("LOCATION VERIFIED", this);
+                } else {
+                    CustomToastMessage.show(String.format(
+                            "You must be %s metres closer to the task location", difference), this);
+                }
+            }
         }
     }
 }
