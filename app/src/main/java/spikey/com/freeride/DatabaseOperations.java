@@ -33,6 +33,9 @@ public class DatabaseOperations {
             FirebaseDatabase.getInstance().getReference("messages/userTaskInfo");
     private static final DatabaseReference treatmentAll_TasksRef =
             FirebaseDatabase.getInstance().getReference("tasks/treatmentAll");
+    private static final DatabaseReference userAcceptedTasks =
+            FirebaseDatabase.getInstance().getReference("userAcceptedTasks");
+    private static final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
 
 
     /**
@@ -43,9 +46,9 @@ public class DatabaseOperations {
      * @param taskId of task
      */
     public static void sendUserTaskInfo(Map<String, Object> dataPayload, String taskId) {
-        if (!connectedToDatabase()) {
-            return;
-        }
+//        if (!connectedToDatabase()) {
+//            return;
+//        }
         Log.d(TAG, "Sending User Task Info to database for task: " + taskId);
         DatabaseReference newMessageRef = mDatabaseUserTaskMessages.child(taskId).push();
         newMessageRef.setValue(dataPayload, new DatabaseReference.CompletionListener() {
@@ -74,20 +77,18 @@ public class DatabaseOperations {
         final String acceptedState = "accepted";
         final String availableState = "available";
         final String notifyAvailableState = "notifyavailable";
-        if (!connectedToDatabase()) {
-            return;
-        }
-        final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
+//        if (!connectedToDatabase()) {
+//            return;
+//        }
         final Context context = activity;
-        DatabaseReference newMessageRef = treatmentAll_TasksRef.child(taskId);
+        DatabaseReference taskRef = treatmentAll_TasksRef.child(taskId);
         Log.d(TAG, "Securing Task: " + taskId);
 
-        newMessageRef.runTransaction(new Transaction.Handler() {
+        taskRef.runTransaction(new Transaction.Handler() {
             int result;
             final int SUCCESS = 1;
             final int ALREADY_SECURED = 2;
             final int ANOTHER_USER = 3;
-            final int WRONG_STATE = 4;
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 Log.d(TAG, "pre-transaction Data value: " + mutableData);
@@ -96,27 +97,22 @@ public class DatabaseOperations {
                     return Transaction.success(mutableData);
                 } else {
                     Task task = gson.fromJson(taskJson, Task.class);
-                    if (    !task.getState().equals(availableState) &&
-                            !task.getState().equals(notifyAvailableState)) {
-                        result = WRONG_STATE;
-                        return Transaction.abort();
-                    } else if (task.getUser() != null) {
-                        if (task.getUser().equals(userId)) {
-                            result = ALREADY_SECURED;
-                            return Transaction.success(mutableData);
-                        } else {
-                            result = ANOTHER_USER;
-                            return Transaction.abort();
-                        }
-                    } else {
+                    String user = task.getUser();
+                    if (user == null) {
+                        result = SUCCESS;
                         task.setUser(userId);
                         task.setState(acceptedState);
                         taskJson = gson.toJson(task);
                         mutableData.setValue(taskJson);
-                        result = SUCCESS;
                         return Transaction.success(mutableData);
-                    }
 
+                    } else if (user.equals(userId)) {
+                        result = ALREADY_SECURED;
+                        return Transaction.success(mutableData);
+                    } else {
+                        result = ANOTHER_USER;
+                        return Transaction.abort();
+                    }
                 }
             }
 
@@ -138,17 +134,49 @@ public class DatabaseOperations {
                         Log.d(TAG, "Task secured by another user");
                         CustomToastMessage.show("Sorry, this task is no longer available", activity);
                         break;
-                    case WRONG_STATE:
-                        Log.d(TAG, "Task state is not available");
-                        CustomToastMessage.show("Sorry, this task is no longer available", activity);
-                        break;
 
                 }
                 if (committed) { // = (SUCCESS || ALREADY_SECURED)
+                    addUserAcceptedTask(userId, taskId);
                     Intent currentTaskIntent = new Intent(context, CurrentTaskActivity.class);
                     currentTaskIntent.putExtra("task", dataSnapshot.getValue(String.class));
                     currentTaskIntent.putExtra("color", taskColor);
                     context.startActivity(currentTaskIntent);
+                }
+            }
+        });
+    }
+
+    /**
+     * This will allow the user to get updated task information when re-opening the app
+     */
+    private static void addUserAcceptedTask(final String userId, final String taskId) {
+        DatabaseReference acceptedTaskRef = userAcceptedTasks.child(userId).child(taskId);
+        acceptedTaskRef.setValue(true, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    Log.d(TAG, "Error on setting user accepted task: " + taskId + ", user: " +
+                            userId + " database error: " + databaseError + ", at " + databaseReference);
+                }
+            }
+        });
+    }
+
+    public static void setTaskVerification(Task task) {
+//        if (!connectedToDatabase()) {
+//            return;
+//        }
+        Log.d(TAG, "Sending verification to database for task: " + task.getTaskId());
+        DatabaseReference taskRef = treatmentAll_TasksRef.child(task.getTaskId());
+        String taskJson = gson.toJson(task);
+        taskRef.setValue(taskJson, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    Log.d(TAG, "Task verification set in database");
+                } else {
+                    Log.d(TAG, "Error on setting task verification : " + databaseError + ", " + databaseReference);
                 }
             }
         });

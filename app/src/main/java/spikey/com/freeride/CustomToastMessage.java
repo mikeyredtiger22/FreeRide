@@ -18,7 +18,7 @@ public class CustomToastMessage{
 
         Toast toast = new Toast(activity);
         toast.setView(toastView);
-        toast.setGravity(Gravity.BOTTOM, 0, 50);
+        toast.setGravity(Gravity.TOP, 0, 50);
         toast.setDuration(Toast.LENGTH_LONG);
         toast.show();
     }

@@ -92,10 +92,12 @@ public class TaskDetailsActivity extends AppCompatActivity {
             addTaskInfo("Distance", task.getDirectionsDistance());
             addTaskInfo("Duration", task.getDirectionsDuration());
         }
+        addTaskInfo("Tasks:", "");
         String[] taskAddresses = task.getLocationAddresses();
         String[] taskInstructions = task.getLocationInstructions();
         for (Integer locationIndex = 0; locationIndex < task.getLocationCount(); locationIndex++) {
-            addTaskInfo(locationIndex + ".", taskAddresses[locationIndex]);
+            String label = task.getAreLocationsOrdered() ? locationIndex + "." : "\u2022\u25E6";
+            addTaskInfo(label, taskAddresses[locationIndex]);
             addTaskInfo("", taskInstructions[locationIndex]);
         }
     }

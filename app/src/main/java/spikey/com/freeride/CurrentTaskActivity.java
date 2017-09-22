@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
@@ -38,6 +39,8 @@ import com.google.gson.GsonBuilder;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.android.SphericalUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CurrentTaskActivity extends AppCompatActivity
@@ -47,9 +50,13 @@ public class CurrentTaskActivity extends AppCompatActivity
 
     private static final int MAP_TOP_PADDING = 100;
     private static final int MAP_PADDING = 150;
+    private static int MAP_WIDTH;
+    private static int MAP_HEIGHT;
 
     private Task task;
     private int taskColor;
+    private ArrayList<Marker> markers = new ArrayList<>();
+    private ArrayList<Boolean> verified = new ArrayList<>();
     private CardView currentTaskCardView;
     private FusedLocationProviderClient locationProvider;
 
@@ -70,9 +77,10 @@ public class CurrentTaskActivity extends AppCompatActivity
         }
 
         currentTaskCardView = findViewById(R.id.current_task_card_view);
-        float screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int cardWidth = (int) (0.85 * screenWidth);
-        currentTaskCardView.getLayoutParams().width = cardWidth;
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        MAP_WIDTH = screenWidth;
+        MAP_HEIGHT = getResources().getDisplayMetrics().heightPixels;
+        currentTaskCardView.getLayoutParams().width = (int) (0.85 * screenWidth);
         currentTaskCardView.setCardBackgroundColor(taskColor);
 
         TextView taskIncentiveText = currentTaskCardView.findViewById(R.id.current_task_incentive);
@@ -148,6 +156,7 @@ public class CurrentTaskActivity extends AppCompatActivity
         // bottom is because of the task cards at the bottom
         ConstraintLayout.LayoutParams layoutParams =
                 (ConstraintLayout.LayoutParams) currentTaskCardView.getLayoutParams();
+        //todo dimensions or layout params in onCreate
         int height = currentTaskCardView.getHeight() + layoutParams.topMargin + layoutParams.bottomMargin;
         googleMap.setPadding(0, MAP_TOP_PADDING, 0, height);
 
@@ -173,23 +182,21 @@ public class CurrentTaskActivity extends AppCompatActivity
         if (locationCount == 1) {
             //Add single location marker to map
             LatLng locationLatLng = new LatLng(locationLats[0], locationLongs[0]);
-            googleMap.addMarker(markerOptions.position(locationLatLng));
-            //Animate view to show marker in centre with zoom of 15..?todo
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15));
+            markers.add(googleMap.addMarker(markerOptions.position(locationLatLng)));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15));
         } else if (locationCount > 1) {
             LatLngBounds.Builder markerBoundsBuilder = LatLngBounds.builder();
             //Add all task locations to map
             for (int locationIndex = 0; locationIndex < locationCount; locationIndex++) {
                 LatLng locationLatLng = new LatLng(locationLats[locationIndex], locationLongs[locationIndex]);
-                googleMap.addMarker(markerOptions.position(locationLatLng));
+                markers.add(googleMap.addMarker(markerOptions.position(locationLatLng)));
                 markerBoundsBuilder.include(locationLatLng);
             }
             //todo include directions in bounds?
             addCurrentTaskDirectionsToMap(googleMap);
-            //Animate google camera to task locations, includes all task location markers
-            //in view plus map padding so markers aren't at edges of screen
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
                     markerBoundsBuilder.build(), MAP_PADDING));
+            Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT);
         } else { //should never be true
             Log.d(TAG, "Task has no locations");
         }
@@ -230,31 +237,71 @@ public class CurrentTaskActivity extends AppCompatActivity
     public void onComplete(@NonNull com.google.android.gms.tasks.Task<Location> locationTask) {
         if (!locationTask.isSuccessful()) {
             Log.d(TAG, "Task verification error: " + locationTask.getException());
-        } else {
-            Location location = locationTask.getResult();
-            if (location == null) {
-                CustomToastMessage.show("Please turn on location to verify task", this);
-            } else {
-                double accuracyMetres = location.getAccuracy();
-                if (accuracyMetres > 50) {
-                    CustomToastMessage.show("Your locations accuracy must be less than 50 metres to verify.\n" +
-                            "Make sure you are using GPS location", this);
-                } else {
-                    //todo increment when verified
-                    LatLng taskLocation = new LatLng(task.getLocationLats()[0], task.getLocationLongs()[0]);
-                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            return;
+        }
+        Location location = locationTask.getResult();
+        if (location == null) {
+            CustomToastMessage.show("Please turn on location to verify task", this);
+            return;
+        }
+        double accuracyMetres = location.getAccuracy();
+        if (accuracyMetres > 50) {
+            CustomToastMessage.show("Your locations accuracy must be less than 50 metres to verify.\n" +
+                    "Make sure you are using GPS location", this);
+            return;
+        }
 
-                    double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
-                            taskLocation, userLocation);
-                    int difference = (int) (taskDistanceMetres - accuracyMetres);
-                    if (difference < 10) {
-                        CustomToastMessage.show("LOCATION VERIFIED", this);
-                    } else {
-                        CustomToastMessage.show(String.format(
-                                "You must be %s metres closer to the task location", difference), this);
-                    }
+        //todo redo method, one for ordered, one for not, to be more clear
+
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+        //get closest/first location
+        Double[] locationLats = task.getLocationLats();
+        Double[] locationLongs = task.getLocationLongs();
+        Boolean[] verified = task.getVerified();
+        //todo use task.verified
+        Integer closestLocationIndex = null;
+        Double closestTaskDistanceMetres = null;
+        if (!task.getAreLocationsOrdered()) {
+            //get closest location
+            for (Integer locationIndex = 0; locationIndex < task.getLocationCount(); locationIndex++) {
+                Log.d(TAG, "v: " + Arrays.toString(verified));
+                if (verified[locationIndex]) { //TODO ERROR
+                    continue;
+                }
+                LatLng newTaskLocation = new LatLng(
+                        locationLats[locationIndex], locationLongs[locationIndex]);
+                double newTaskDistanceMetres = SphericalUtil.computeDistanceBetween(
+                        newTaskLocation, userLocation);
+                Log.d(TAG, newTaskDistanceMetres + " : " + locationIndex);
+                if (closestLocationIndex == null ||
+                        newTaskDistanceMetres < closestTaskDistanceMetres) {
+                    closestLocationIndex = locationIndex;
+                    closestTaskDistanceMetres = newTaskDistanceMetres;
                 }
             }
         }
+
+        //verify location
+        Log.d(TAG, accuracyMetres + " index: " + closestLocationIndex);
+
+        int difference = (int) (closestTaskDistanceMetres - accuracyMetres);
+        if (difference < 50) {
+            //todo overwrite previous toast message
+            CustomToastMessage.show("LOCATION VERIFIED", this);
+            addToTaskVerification(closestLocationIndex);
+        } else {
+            CustomToastMessage.show(String.format(
+                    "You must be %s metres closer to the task location", difference), this);
+        }
+    }
+
+    private void addToTaskVerification(int locationIndex) {
+        Boolean[] verified = task.getVerified();
+        verified[locationIndex] = true;
+        task.setVerified(verified);
+        //set verified location marker to white
+        markers.get(locationIndex).setAlpha(0.5f);
+        DatabaseOperations.setTaskVerification(task);
     }
 }

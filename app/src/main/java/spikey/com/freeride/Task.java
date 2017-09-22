@@ -6,10 +6,12 @@ public class Task {
 
     private String taskId;
     private Integer locationCount;
+    private Boolean areLocationsOrdered;
     private Double[] locationLats;
     private Double[] locationLongs;
     private String[] locationInstructions;
     private String[] locationAddresses;
+    private Boolean[] verified;
     private LocalDateTime creationLocalDateTime;
     private LocalDateTime expirationLocalDateTime;
     private String title;
@@ -22,16 +24,18 @@ public class Task {
     private String directionsDistance;
     private String directionsDuration;
 
-    public Task(Integer locationCount, Double[] locationLats, Double[] locationLongs,
-                String[] locationInstructions, String[] locationAddresses,
+    public Task(Integer locationCount, Boolean areLocationsOrdered, Double[] locationLats, Double[] locationLongs,
+                String[] locationInstructions, String[] locationAddresses, Boolean[] verified,
                 LocalDateTime creationLocalDateTime, LocalDateTime expirationLocalDateTime,
                 String title, String description, String state, String user, Integer incentive,
                 Boolean hasDirections, String directionsPath, String directionsDistance, String directionsDuration) {
         this.locationCount = locationCount;
+        this.areLocationsOrdered = areLocationsOrdered;
         this.locationLats = locationLats;
         this.locationLongs = locationLongs;
         this.locationInstructions = locationInstructions;
         this.locationAddresses = locationAddresses;
+        this.verified = verified;
         this.creationLocalDateTime = creationLocalDateTime;
         this.expirationLocalDateTime = expirationLocalDateTime;
         this.title = title;
@@ -65,6 +69,14 @@ public class Task {
         this.locationCount = locationCount;
     }
 
+    public Boolean getAreLocationsOrdered() {
+        return areLocationsOrdered;
+    }
+
+    public void setAreLocationsOrdered(Boolean areLocationsOrdered) {
+        this.areLocationsOrdered = areLocationsOrdered;
+    }
+
     public Double[] getLocationLats() {
         return locationLats;
     }
@@ -95,6 +107,14 @@ public class Task {
 
     public void setLocationAddresses(String[] locationAddresses) {
         this.locationAddresses = locationAddresses;
+    }
+
+    public Boolean[] getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean[] verified) {
+        this.verified = verified;
     }
 
     public LocalDateTime getCreationLocalDateTime() {
