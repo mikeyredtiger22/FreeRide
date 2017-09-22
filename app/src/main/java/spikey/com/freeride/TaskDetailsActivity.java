@@ -5,18 +5,26 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
+
 public class TaskDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = TaskDetailsActivity.class.getSimpleName();
 
     private Task task;
+    ArrayList<String> labels;
+    ArrayList<String> taskInfo;
     private int taskColor;
 
     @Override
@@ -43,38 +51,70 @@ public class TaskDetailsActivity extends AppCompatActivity {
         }
 
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(taskColor));
+        //todo set nav bar color
+        //todo change toolbar color programmatically
+
+        labels = new ArrayList<>();
+        taskInfo = new ArrayList<>();
         setTaskInfo();
+
+        final LayoutInflater layoutInflater = getLayoutInflater();
+        RecyclerView recyclerView = findViewById(R.id.task_details_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new RecyclerView.Adapter() {
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                return new TaskDetailsViewHolder(
+                        layoutInflater.inflate(R.layout.task_details_layout_item, parent, false));
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+                TaskDetailsViewHolder viewHolder = (TaskDetailsViewHolder) holder;
+                viewHolder.label.setText(labels.get(position));
+                viewHolder.info.setText(taskInfo.get(position));
+                viewHolder.info.setSelected(true); //this allows the text to scroll when overflowing
+            }
+
+            @Override
+            public int getItemCount() {
+                return taskInfo.size();
+            }
+        });
     }
 
     private void setTaskInfo() {
-        TextView title = findViewById(R.id.task_details_title_info);
-        TextView desc = findViewById(R.id.task_details_desc_info);
-        TextView incentive = findViewById(R.id.task_details_incentive_info);
-        TextView startLocation = findViewById(R.id.task_details_start_location_info);
-        TextView startLocationLabel = findViewById(R.id.task_details_start_location);
-        TextView endLocation = findViewById(R.id.task_details_end_location_info);
-        TextView endLocationLabel = findViewById(R.id.task_details_end_location);
-        TextView duration = findViewById(R.id.task_details_duration_info);
-        TextView durationLabel = findViewById(R.id.task_details_duration);
-        TextView distance = findViewById(R.id.task_details_distance_info);
-        TextView distanceLabel = findViewById(R.id.task_details_distance);
-
-        title        .setText(task.getTitle());
-        desc         .setText(task.getDescription());
-        startLocation.setText(task.getStartAddress());
-        incentive    .setText(String.valueOf(task.getIncentive()));
-
-        if (!task.getOneLocation()) {
-            endLocation.setText(task.getEndAddress());
-            distance   .setText(task.getDirectionsDistance());
-            duration   .setText(task.getDirectionsDuration());
-        } else {
-            startLocationLabel.setText(R.string.location_colon);
-            endLocationLabel.setVisibility(View.GONE);
-            durationLabel.setVisibility(View.GONE);
-            distanceLabel.setVisibility(View.GONE);
+        //Populate arrays with task info and labels
+        addTaskInfo("Title", task.getTitle());
+        addTaskInfo("Description", task.getDescription());
+        addTaskInfo("Points", task.getIncentive().toString());
+        if (task.getHasDirections()) {
+            addTaskInfo("Distance", task.getDirectionsDistance());
+            addTaskInfo("Duration", task.getDirectionsDuration());
         }
+        String[] taskAddresses = task.getLocationAddresses();
+        String[] taskInstructions = task.getLocationInstructions();
+        for (Integer locationIndex = 0; locationIndex < task.getLocationCount(); locationIndex++) {
+            addTaskInfo(locationIndex + ".", taskAddresses[locationIndex]);
+            addTaskInfo("", taskInstructions[locationIndex]);
+        }
+    }
 
+    private void addTaskInfo(String label, String taskDetail) {
+        labels.add(label);
+        taskInfo.add(taskDetail);
+    }
+
+    class TaskDetailsViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView label;
+        public TextView info;
+
+        public TaskDetailsViewHolder(View itemView) {
+            super(itemView);
+            label = itemView.findViewById(R.id.task_details_label);
+            info = itemView.findViewById(R.id.task_details_info);
+        }
     }
 
 }

@@ -30,7 +30,6 @@ import com.google.maps.android.PolyUtil;
 import java.util.List;
 
 import spikey.com.freeride.CustomToastMessage;
-import spikey.com.freeride.R;
 import spikey.com.freeride.Task;
 
 public class MapView implements
@@ -112,21 +111,33 @@ public class MapView implements
 
         Task selectedTask = tasks[FOCUSED_TASK_POS];
         MarkerOptions markerOptions = new MarkerOptions().icon(getColoredMarker());
-        LatLng startLatLng = new LatLng(selectedTask.getStartLat(), selectedTask.getStartLong());
 
-        if (selectedTask.getEndLat() != null) {//two locationProvider (start and end) task
-            googleMap.addMarker(markerOptions.position(startLatLng).title(context.getString(R.string.start)));
-            LatLng endLatLng = new LatLng(selectedTask.getEndLat(), selectedTask.getEndLong());
-            googleMap.addMarker(markerOptions.position(endLatLng).title(context.getString(R.string.end)));
+        Double[] locationLats = selectedTask.getLocationLats();
+        Double[] locationLongs = selectedTask.getLocationLongs();
+        int locationCount = selectedTask.getLocationCount();
 
+        if (locationCount == 1) {
+            //Add single location marker to map
+            LatLng locationLatLng = new LatLng(locationLats[0], locationLongs[0]);
+            googleMap.addMarker(markerOptions.position(locationLatLng));
+            //Animate view to show marker in centre with zoom of 15..?todo
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15));
+        } else if (locationCount > 1) {
+            LatLngBounds.Builder markerBoundsBuilder = LatLngBounds.builder();
+            //Add all task locations to map
+            for (int locationIndex = 0; locationIndex < locationCount; locationIndex++) {
+                LatLng locationLatLng = new LatLng(locationLats[locationIndex], locationLongs[locationIndex]);
+                googleMap.addMarker(markerOptions.position(locationLatLng));
+                markerBoundsBuilder.include(locationLatLng);
+            }
+            //todo include directions in bounds?
             addCurrentTaskDirectionsToMap();
-
-            LatLngBounds markerBounds = LatLngBounds.builder()
-                    .include(startLatLng).include(endLatLng).build();
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
-        } else {
-            googleMap.addMarker(markerOptions.position(startLatLng));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15));
+            //Animate google camera to task locations, includes all task location markers
+            //in view plus map padding so markers aren't at edges of screen
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+                    markerBoundsBuilder.build(), MAP_PADDING));
+        } else { //should never be true
+            Log.d(TAG, "Task has no locations");
         }
     }
 

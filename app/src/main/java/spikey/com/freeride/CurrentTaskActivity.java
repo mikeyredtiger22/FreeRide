@@ -86,12 +86,13 @@ public class CurrentTaskActivity extends AppCompatActivity
 
         taskIncentiveText.setText(String.format("%s %s",
                 getString(R.string.points_colon), task.getIncentive()));
+        String[] locationAddresses = task.getLocationAddresses();
         cardFirstLine.setText(String.format("%s %s",
-                getString(R.string.start_colon), task.getStartAddress()));
-
-        if (!task.getOneLocation()) {
+                getString(R.string.start_colon), locationAddresses[0]));
+        int locationCount = task.getLocationCount();
+        if (locationCount > 1 && task.getHasDirections()) {
             cardSecondLine.setText(String.format("%s %s",
-                    getString(R.string.end_colon), task.getEndAddress()));
+                    getString(R.string.end_colon), locationAddresses[locationCount-1]));
             cardThirdLine.setText(String.format("%s %s",
                     getString(R.string.duration_colon), task.getDirectionsDuration()));
         } else {
@@ -153,12 +154,10 @@ public class CurrentTaskActivity extends AppCompatActivity
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             CustomToastMessage.show("No Location Permission", this);
-            /*
+
             googleMap.setMyLocationEnabled(false);
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            getLocationPermission();
-        }
-             */
+            // todo getLocationPermission();
         } else {
             googleMap.setMyLocationEnabled(true);
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -166,22 +165,33 @@ public class CurrentTaskActivity extends AppCompatActivity
 
         locationProvider.getLastLocation();
 
+        Double[] locationLats = task.getLocationLats();
+        Double[] locationLongs = task.getLocationLongs();
+        int locationCount = task.getLocationCount();
+
         MarkerOptions markerOptions = new MarkerOptions().icon(getColoredMarker());
-        LatLng startLatLng = new LatLng(task.getStartLat(), task.getStartLong());
-
-        if (task.getEndLat() != null) {//two locationProvider (start and end) task
-            googleMap.addMarker(markerOptions.position(startLatLng).title(getString(R.string.start)));
-            LatLng endLatLng = new LatLng(task.getEndLat(), task.getEndLong());
-            googleMap.addMarker(markerOptions.position(endLatLng).title(getString(R.string.end)));
-
+        if (locationCount == 1) {
+            //Add single location marker to map
+            LatLng locationLatLng = new LatLng(locationLats[0], locationLongs[0]);
+            googleMap.addMarker(markerOptions.position(locationLatLng));
+            //Animate view to show marker in centre with zoom of 15..?todo
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15));
+        } else if (locationCount > 1) {
+            LatLngBounds.Builder markerBoundsBuilder = LatLngBounds.builder();
+            //Add all task locations to map
+            for (int locationIndex = 0; locationIndex < locationCount; locationIndex++) {
+                LatLng locationLatLng = new LatLng(locationLats[locationIndex], locationLongs[locationIndex]);
+                googleMap.addMarker(markerOptions.position(locationLatLng));
+                markerBoundsBuilder.include(locationLatLng);
+            }
+            //todo include directions in bounds?
             addCurrentTaskDirectionsToMap(googleMap);
-
-            LatLngBounds markerBounds = LatLngBounds.builder()
-                    .include(startLatLng).include(endLatLng).build();
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(markerBounds, MAP_PADDING));
-        } else {
-            googleMap.addMarker(markerOptions.position(startLatLng));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 15));
+            //Animate google camera to task locations, includes all task location markers
+            //in view plus map padding so markers aren't at edges of screen
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
+                    markerBoundsBuilder.build(), MAP_PADDING));
+        } else { //should never be true
+            Log.d(TAG, "Task has no locations");
         }
     }
 
@@ -225,18 +235,24 @@ public class CurrentTaskActivity extends AppCompatActivity
             if (location == null) {
                 CustomToastMessage.show("Please turn on location to verify task", this);
             } else {
-                LatLng taskLocation = new LatLng(task.getStartLat(), task.getStartLong());
-                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-                double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
-                        taskLocation, userLocation);
                 double accuracyMetres = location.getAccuracy();
-                int difference = (int) (taskDistanceMetres - accuracyMetres);
-                if (difference < 10) {
-                    CustomToastMessage.show("LOCATION VERIFIED", this);
+                if (accuracyMetres > 50) {
+                    CustomToastMessage.show("Your locations accuracy must be less than 50 metres to verify.\n" +
+                            "Make sure you are using GPS location", this);
                 } else {
-                    CustomToastMessage.show(String.format(
-                            "You must be %s metres closer to the task location", difference), this);
+                    //todo increment when verified
+                    LatLng taskLocation = new LatLng(task.getLocationLats()[0], task.getLocationLongs()[0]);
+                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                    double taskDistanceMetres = SphericalUtil.computeDistanceBetween(
+                            taskLocation, userLocation);
+                    int difference = (int) (taskDistanceMetres - accuracyMetres);
+                    if (difference < 10) {
+                        CustomToastMessage.show("LOCATION VERIFIED", this);
+                    } else {
+                        CustomToastMessage.show(String.format(
+                                "You must be %s metres closer to the task location", difference), this);
+                    }
                 }
             }
         }

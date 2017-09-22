@@ -5,46 +5,44 @@ import org.joda.time.LocalDateTime;
 public class Task {
 
     private String taskId;
-    private Boolean oneLocation;
-    private Double startLat;
-    private Double startLong;
-    private Double endLat;
-    private Double endLong;
-    private String startAddress;
-    private String endAddress;
+    private Integer locationCount;
+    private Double[] locationLats;
+    private Double[] locationLongs;
+    private String[] locationInstructions;
+    private String[] locationAddresses;
     private LocalDateTime creationLocalDateTime;
     private LocalDateTime expirationLocalDateTime;
     private String title;
     private String description;
     private String state;
     private String user;
+    private Integer incentive;
+    private Boolean hasDirections;
     private String directionsPath;
     private String directionsDistance;
     private String directionsDuration;
-    private Integer incentive;
 
-    public Task(Boolean oneLocation, Double startLat, Double startLong, Double endLat, Double endLong,
-                String startAddress, String endAddress,
+    public Task(Integer locationCount, Double[] locationLats, Double[] locationLongs,
+                String[] locationInstructions, String[] locationAddresses,
                 LocalDateTime creationLocalDateTime, LocalDateTime expirationLocalDateTime,
-                String title, String description, String state, String user,
-                String directionsPath, String directionsDistance, String directionsDuration, Integer incentive) {
-        this.oneLocation = oneLocation;
-        this.startLat = startLat;
-        this.startLong = startLong;
-        this.endLat = endLat;
-        this.endLong = endLong;
-        this.startAddress = startAddress;
-        this.endAddress = endAddress;
+                String title, String description, String state, String user, Integer incentive,
+                Boolean hasDirections, String directionsPath, String directionsDistance, String directionsDuration) {
+        this.locationCount = locationCount;
+        this.locationLats = locationLats;
+        this.locationLongs = locationLongs;
+        this.locationInstructions = locationInstructions;
+        this.locationAddresses = locationAddresses;
         this.creationLocalDateTime = creationLocalDateTime;
         this.expirationLocalDateTime = expirationLocalDateTime;
         this.title = title;
         this.description = description;
         this.state = state;
         this.user = user;
+        this.incentive = incentive;
+        this.hasDirections = hasDirections;
         this.directionsPath = directionsPath;
         this.directionsDistance = directionsDistance;
         this.directionsDuration = directionsDuration;
-        this.incentive = incentive;
     }
 
     public Task() {
@@ -59,60 +57,44 @@ public class Task {
         this.taskId = taskId;
     }
 
-    public Boolean getOneLocation() {
-        return oneLocation;
+    public Integer getLocationCount() {
+        return locationCount;
     }
 
-    public void setOneLocation(Boolean oneLocation) {
-        this.oneLocation = oneLocation;
+    public void setLocationCount(Integer locationCount) {
+        this.locationCount = locationCount;
     }
 
-    public Double getStartLat() {
-        return startLat;
+    public Double[] getLocationLats() {
+        return locationLats;
     }
 
-    public void setStartLat(Double startLat) {
-        this.startLat = startLat;
+    public void setLocationLats(Double[] locationLats) {
+        this.locationLats = locationLats;
     }
 
-    public Double getStartLong() {
-        return startLong;
+    public Double[] getLocationLongs() {
+        return locationLongs;
     }
 
-    public void setStartLong(Double startLong) {
-        this.startLong = startLong;
+    public void setLocationLongs(Double[] locationLongs) {
+        this.locationLongs = locationLongs;
     }
 
-    public Double getEndLat() {
-        return endLat;
+    public String[] getLocationInstructions() {
+        return locationInstructions;
     }
 
-    public void setEndLat(Double endLat) {
-        this.endLat = endLat;
+    public void setLocationInstructions(String[] locationInstructions) {
+        this.locationInstructions = locationInstructions;
     }
 
-    public Double getEndLong() {
-        return endLong;
+    public String[] getLocationAddresses() {
+        return locationAddresses;
     }
 
-    public void setEndLong(Double endLong) {
-        this.endLong = endLong;
-    }
-
-    public String getStartAddress() {
-        return startAddress;
-    }
-
-    public void setStartAddress(String startAddress) {
-        this.startAddress = startAddress;
-    }
-
-    public String getEndAddress() {
-        return endAddress;
-    }
-
-    public void setEndAddress(String endAddress) {
-        this.endAddress = endAddress;
+    public void setLocationAddresses(String[] locationAddresses) {
+        this.locationAddresses = locationAddresses;
     }
 
     public LocalDateTime getCreationLocalDateTime() {
@@ -163,6 +145,22 @@ public class Task {
         this.user = user;
     }
 
+    public Integer getIncentive() {
+        return incentive;
+    }
+
+    public void setIncentive(Integer incentive) {
+        this.incentive = incentive;
+    }
+
+    public Boolean getHasDirections() {
+        return hasDirections;
+    }
+
+    public void setHasDirections(Boolean hasDirections) {
+        this.hasDirections = hasDirections;
+    }
+
     public String getDirectionsPath() {
         return directionsPath;
     }
@@ -185,13 +183,5 @@ public class Task {
 
     public void setDirectionsDuration(String directionsDuration) {
         this.directionsDuration = directionsDuration;
-    }
-
-    public Integer getIncentive() {
-        return incentive;
-    }
-
-    public void setIncentive(Integer incentive) {
-        this.incentive = incentive;
     }
 }

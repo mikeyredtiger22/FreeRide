@@ -74,16 +74,6 @@
             android:text="ACCEPT"/>
 
         <Button
-            android:id="@+id/task_dismiss_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toStartOf="@id/task_accept_button"
-            style="@style/ButtonColored"
-            android:textColor="@android:color/white"
-            android:text="DISMISS"/>
-
-        <Button
             android:id="@+id/task_more_info_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

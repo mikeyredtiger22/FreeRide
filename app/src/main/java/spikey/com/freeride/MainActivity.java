@@ -8,9 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -34,7 +32,6 @@ public class MainActivity extends AppCompatActivity{
     private Context context;
 
     private ProgressBar progressCircle;
-    private TextView locationType;
     private TextView connectedValue;
 
 
@@ -44,25 +41,33 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         checkPlayServices();
-        FirebaseMessaging.getInstance().subscribeToTopic("test");
+        FirebaseMessaging.getInstance().subscribeToTopic("ALL");
         activity = this;
         context = this;
 
         progressCircle = findViewById(R.id.progress_circle);
-        locationType = findViewById(R.id.location_type);
         connectedValue = findViewById(R.id.connected_value);
 
-        final Switch locationTypeSwitch = findViewById(R.id.location_type_switch);
-        locationTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        //TODO why does this return false first few times?
+        ValueEventListener connectedListener = new ValueEventListener() {
+            boolean connected = false;
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean on) {
-                if (on) {
-                    locationType.setText(R.string.two_location_tasks);
+            public void onDataChange(DataSnapshot snapshot) {
+                connected = snapshot.getValue(Boolean.class);
+                if (connected) {
+                    connectedValue.setText(R.string.true_);
                 } else {
-                    locationType.setText(R.string.one_location_tasks);
+                    connectedValue.setText(R.string.false_);
                 }
+                Log.e(TAG, "Connected = " + connected);
             }
-        });
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Listener was cancelled");
+            }
+        };
+        DatabaseOperations.connectedToDatabase(connectedListener);
 
         final Button buttonDbTest = findViewById(R.id.button_db_connect);
         buttonDbTest.setOnClickListener(new View.OnClickListener() {
@@ -83,8 +88,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 progressCircle.setVisibility(View.VISIBLE);
-                boolean oneLocationTasks = !locationTypeSwitch.isChecked();
-                DatabaseOperations.getAvailableTasks(oneLocationTasks, new GetAvailableTasksListener());
+                DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
             }
         });
 
@@ -109,7 +113,7 @@ public class MainActivity extends AppCompatActivity{
         super.onResume();
         progressCircle.setVisibility(View.INVISIBLE);
         checkPlayServices();
-        DatabaseOperations.connectedToDatabase();
+//        DatabaseOperations.connectedToDatabase();
         DatabaseReference.goOnline();////////////////
         //DatabaseOperations.listen();
         //DatabaseOperations.databaseMessageTest();
@@ -140,12 +144,12 @@ public class MainActivity extends AppCompatActivity{
             }
 
             //We use an array to store the tasks because it is much easier for the rest of the
-            //application to deal with an ordered collection.
+            //application to deal with an ordered immutable collection.
             int count = (int) dataSnapshot.getChildrenCount();
             String[] tasksJsonArray = new String[count];
             int index = 0;
             for (DataSnapshot taskData : dataSnapshot.getChildren()) {
-                //tasksObjectArray.add(taskData.getValue());
+                //todo check that no other user is doing this task
                 tasksJsonArray[index] = taskData.getValue().toString();
                 index++;
             }
