@@ -194,12 +194,15 @@ public class CurrentTaskActivity extends AppCompatActivity
             }
             //todo include directions in bounds?
             addCurrentTaskDirectionsToMap(googleMap);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                    markerBoundsBuilder.build(), MAP_PADDING));
-            //Error using newLatLngBounds(LatLngBounds, int): Map size can't be 0. Most likely,
-            // layout has not yet occured for the map view.  Either wait until layout has occurred
-            // or use newLatLngBounds(LatLngBounds, int, int, int) which allows you to specify the map's dimensions.
-            Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT);
+            final LatLngBounds bounds = markerBoundsBuilder.build();
+            final GoogleMap mapFinal = googleMap;
+            googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    mapFinal.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_PADDING));
+                    Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT);
+                }
+            });
         } else { //should never be true
             Log.d(TAG, "Task has no locations");
         }
