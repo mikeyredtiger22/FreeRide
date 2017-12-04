@@ -196,6 +196,9 @@ public class CurrentTaskActivity extends AppCompatActivity
             addCurrentTaskDirectionsToMap(googleMap);
             googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(
                     markerBoundsBuilder.build(), MAP_PADDING));
+            //Error using newLatLngBounds(LatLngBounds, int): Map size can't be 0. Most likely,
+            // layout has not yet occured for the map view.  Either wait until layout has occurred
+            // or use newLatLngBounds(LatLngBounds, int, int, int) which allows you to specify the map's dimensions.
             Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT);
         } else { //should never be true
             Log.d(TAG, "Task has no locations");
@@ -288,20 +291,37 @@ public class CurrentTaskActivity extends AppCompatActivity
         int difference = (int) (closestTaskDistanceMetres - accuracyMetres);
         if (difference < 50) {
             //todo overwrite previous toast message
-            CustomToastMessage.show("LOCATION VERIFIED", this);
-            addToTaskVerification(closestLocationIndex);
+            CustomToastMessage.show("Location verified", this);
+            verifiyTaskLocation(closestLocationIndex);
         } else {
             CustomToastMessage.show(String.format(
                     "You must be %s metres closer to the task location", difference), this);
         }
     }
 
-    private void addToTaskVerification(int locationIndex) {
+    private void verifiyTaskLocation(int locationIndex) {
         Boolean[] verified = task.getVerified();
         verified[locationIndex] = true;
-        task.setVerified(verified);
-        //set verified location marker to white
+        task.setVerified(verified); //todo needed? object reference..
+        //dull color of verified location markers
         markers.get(locationIndex).setAlpha(0.5f);
-        DatabaseOperations.setTaskVerification(task);
+
+        //if all locations verified, then task is complete.
+        boolean allTasksComplete = true;
+        for (Boolean complete : verified) {
+            if (!complete) {
+                allTasksComplete = false;
+                break;
+            }
+        }
+        if (allTasksComplete) {
+            CustomToastMessage.show("Task Complete", this);
+            task.setState("complete");
+            DatabaseOperations.updateTask(task, "state and verification");
+            //end activity
+            finish();
+        } else {
+            DatabaseOperations.updateTask(task, "verification");
+        }
     }
 }

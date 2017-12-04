@@ -163,20 +163,20 @@ public class DatabaseOperations {
         });
     }
 
-    public static void setTaskVerification(Task task) {
+    public static void updateTask(Task task, final String property) {
 //        if (!connectedToDatabase()) {
 //            return;
 //        }
-        Log.d(TAG, "Sending verification to database for task: " + task.getTaskId());
+        Log.d(TAG, "Sending task " + property + " in database: " + task.getTaskId());
         DatabaseReference taskRef = treatmentAll_TasksRef.child(task.getTaskId());
         String taskJson = gson.toJson(task);
         taskRef.setValue(taskJson, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError == null) {
-                    Log.d(TAG, "Task verification set in database");
+                    Log.d(TAG, "Task " + property + " set in database");
                 } else {
-                    Log.d(TAG, "Error on setting task verification : " + databaseError + ", " + databaseReference);
+                    Log.d(TAG, "Error on setting task " + property + " : " + databaseError + ", " + databaseReference);
                 }
             }
         });
