@@ -74,7 +74,7 @@ public class TaskRecyclerViewAdapter
         holder.taskAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatabaseOperations.secureTask(task, activity, taskColor);
+                DatabaseOperations.secureTask(task.getTaskId(), activity, taskColor);
             }
         });
 

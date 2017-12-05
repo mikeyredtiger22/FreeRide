@@ -15,7 +15,10 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -268,15 +271,15 @@ public class CurrentTaskActivity extends AppCompatActivity
         //get closest/first location
         Double[] locationLats = task.getLocationLats();
         Double[] locationLongs = task.getLocationLongs();
-        Boolean[] verified = task.getVerified();
-        //todo use task.verified
+        Boolean[] locationVerified = task.getLocationVerified();
+        //todo use task.locationVerified
         Integer closestLocationIndex = null;
         Double closestTaskDistanceMetres = null;
         if (!task.getAreLocationsOrdered()) {
             //get closest location
             for (Integer locationIndex = 0; locationIndex < task.getLocationCount(); locationIndex++) {
-                Log.d(TAG, "v: " + Arrays.toString(verified));
-                if (verified[locationIndex]) { //TODO ERROR
+                Log.d(TAG, "v: " + Arrays.toString(locationVerified));
+                if (locationVerified[locationIndex]) { //TODO ERROR
                     continue;
                 }
                 LatLng newTaskLocation = new LatLng(
@@ -296,48 +299,75 @@ public class CurrentTaskActivity extends AppCompatActivity
         Log.d(TAG, accuracyMetres + " index: " + closestLocationIndex);
 
         int difference = (int) (closestTaskDistanceMetres - accuracyMetres);
-        if (difference < 50) {
-            //todo overwrite previous toast message
-            CustomToastMessage.show("Location verified", this);
-            
-            //Open Sensor input dialog
-            final int locationIndex = closestLocationIndex;
-            final EditText sensorInputField = new EditText(this); //todo add better padding
-            sensorInputField.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                    .setTitle("Title")
-                    .setMessage("Message")
-                    .setView(sensorInputField)
-                    .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String sensorInput = sensorInputField.getText().toString();
-                            verifyTaskLocation(locationIndex, sensorInput);
-                        }
-                    });
-
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.show();
-
-        } else {
+        if (difference > 50) {
             CustomToastMessage.show(String.format(
                     "You must be %s metres closer to the task location", difference), this);
+            return;
         }
+
+        //todo overwrite previous toast message
+        CustomToastMessage.show("Location verified", this);
+
+        //Create dialog to accept number input
+        final int locationIndex = closestLocationIndex;
+        final EditText sensorInputField = new EditText(this); //todo add better padding
+        sensorInputField.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Title")
+                .setMessage("Message")
+                .setView(sensorInputField)
+                .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String sensorInput = sensorInputField.getText().toString();
+                        verifyTaskLocation(locationIndex, sensorInput);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .create();
+
+        //Only enable Submit button when user input is not empty
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                final Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setEnabled(false);
+
+                sensorInputField.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (TextUtils.isEmpty(sensorInputField.getText().toString())) {
+                            button.setEnabled(false);
+                        } else {
+                            button.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     private void verifyTaskLocation(int locationIndex, String sensorInput) {
-        Boolean[] verified = task.getVerified();
+        Boolean[] verified = task.getLocationVerified();
         verified[locationIndex] = true;
-        task.setVerified(verified); //todo needed? object reference..
-        //todo add sensor input to database
-        CustomToastMessage.show(sensorInput, this);
+        String[] locationUserData = task.getLocationUserData();
+        locationUserData[locationIndex] = sensorInput;
         //dull color of verified location markers
         markers.get(locationIndex).setAlpha(0.5f);
 
@@ -352,11 +382,14 @@ public class CurrentTaskActivity extends AppCompatActivity
         if (allTasksComplete) {
             CustomToastMessage.show("Task Complete", this);
             task.setState("complete");
-            DatabaseOperations.updateTask(task, "state and verification");
+            DatabaseOperations.updateTask(task, "state, verification and location user data");
+            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex);
+            DatabaseOperations.addUserTaskActivity(task.getTaskId(), DatabaseOperations.UserTaskActivity.Completed);
             //end activity
             finish();
         } else {
-            DatabaseOperations.updateTask(task, "verification");
+            DatabaseOperations.updateTask(task, "verification and location user data");
+            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex);
         }
     }
 }

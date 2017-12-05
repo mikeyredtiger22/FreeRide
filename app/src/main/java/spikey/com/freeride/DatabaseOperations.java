@@ -25,6 +25,8 @@ import java.util.Map;
 
 public class DatabaseOperations {
 
+    public enum UserTaskActivity {Accepted, Completed, Cancelled}
+
     private static final String TAG = DatabaseOperations.class.getSimpleName();
 
     public static boolean connected;
@@ -34,6 +36,8 @@ public class DatabaseOperations {
     private static final DatabaseReference treatmentAll_TasksRef =
             FirebaseDatabase.getInstance().getReference("tasks/treatmentAll");
     private static final DatabaseReference userAcceptedTasks =
+            FirebaseDatabase.getInstance().getReference("userAcceptedTasks");
+    private static final DatabaseReference userTaskActivity =
             FirebaseDatabase.getInstance().getReference("userAcceptedTasks");
     private static final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
 
@@ -46,9 +50,6 @@ public class DatabaseOperations {
      * @param taskId of task
      */
     public static void sendUserTaskInfo(Map<String, Object> dataPayload, String taskId) {
-//        if (!connectedToDatabase()) {
-//            return;
-//        }
         Log.d(TAG, "Sending User Task Info to database for task: " + taskId);
         DatabaseReference newMessageRef = mDatabaseUserTaskMessages.child(taskId).push();
         newMessageRef.setValue(dataPayload, new DatabaseReference.CompletionListener() {
@@ -68,18 +69,14 @@ public class DatabaseOperations {
      * Uses a transaction (concurrency safe).
      * transaction is recalled until the user field is set by a user.
      *
-     * @param currentTask id for database. whole object for intent
+     * @param taskId for database
      * @param activity to create current task activity intent in success callback and toast message
      */
-    public static void secureTask(final Task currentTask, final Activity activity, final int taskColor) {
-        final String taskId = currentTask.getTaskId();
+    public static void secureTask(final String taskId, final Activity activity, final int taskColor) {
         final String userId = FirebaseInstanceId.getInstance().getToken();
         final String acceptedState = "accepted";
         final String availableState = "available";
         final String notifyAvailableState = "notifyavailable";
-//        if (!connectedToDatabase()) {
-//            return;
-//        }
         final Context context = activity;
         DatabaseReference taskRef = treatmentAll_TasksRef.child(taskId);
         Log.d(TAG, "Securing Task: " + taskId);
@@ -125,6 +122,7 @@ public class DatabaseOperations {
                     case SUCCESS:
                         Log.d(TAG, "Task secured");
                         CustomToastMessage.show("Task secured", activity);
+                        addUserTaskActivity(taskId, UserTaskActivity.Accepted);
                         break;
                     case ALREADY_SECURED:
                         Log.d(TAG, "Task already secured by this user");
@@ -137,7 +135,6 @@ public class DatabaseOperations {
 
                 }
                 if (committed) { // = (SUCCESS || ALREADY_SECURED)
-                    addUserAcceptedTask(userId, taskId);
                     Intent currentTaskIntent = new Intent(context, CurrentTaskActivity.class);
                     currentTaskIntent.putExtra("task", dataSnapshot.getValue(String.class));
                     currentTaskIntent.putExtra("color", taskColor);
@@ -147,16 +144,27 @@ public class DatabaseOperations {
         });
     }
 
-    /**
-     * This will allow the user to get updated task information when re-opening the app
-     */
-    private static void addUserAcceptedTask(final String userId, final String taskId) {
-        DatabaseReference acceptedTaskRef = userAcceptedTasks.child(userId).child(taskId);
-        acceptedTaskRef.setValue(true, new DatabaseReference.CompletionListener() {
+    public static void addUserTaskActivity(final String taskId, UserTaskActivity activity) {
+        addUserTaskActivity(taskId, activity.toString());
+    }
+
+    public static void addUserLocationData(final String taskId, Integer locationVerified) {
+        String activityString = "Verified Location, Index: " + locationVerified;
+        addUserTaskActivity(taskId, activityString);
+    }
+
+    private static void addUserTaskActivity(final String taskId, String activity) {
+        final String userId = FirebaseInstanceId.getInstance().getToken();
+        DatabaseReference activityRef = userTaskActivity.child(userId).child(taskId);
+        //Firebase doesn't allow a decimal point inside a path name
+        String datePath = LocalDateTime.now().toString().replaceAll("\\.", ",");
+        activityRef = activityRef.child(gson.toJson(datePath));
+        String value = activity.toString();
+        activityRef.setValue(value, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError != null) {
-                    Log.d(TAG, "Error on setting user accepted task: " + taskId + ", user: " +
+                    Log.d(TAG, "Error on setting user task activity. taskId: " + taskId + ", userId: " +
                             userId + " database error: " + databaseError + ", at " + databaseReference);
                 }
             }
@@ -164,9 +172,6 @@ public class DatabaseOperations {
     }
 
     public static void updateTask(Task task, final String property) {
-//        if (!connectedToDatabase()) {
-//            return;
-//        }
         Log.d(TAG, "Sending task " + property + " in database: " + task.getTaskId());
         DatabaseReference taskRef = treatmentAll_TasksRef.child(task.getTaskId());
         String taskJson = gson.toJson(task);

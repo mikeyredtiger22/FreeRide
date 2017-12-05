@@ -11,7 +11,8 @@ public class Task {
     private Double[] locationLongs;
     private String[] locationInstructions;
     private String[] locationAddresses;
-    private Boolean[] verified;
+    private String[] locationUserData;
+    private Boolean[] locationVerified;
     private LocalDateTime creationLocalDateTime;
     private LocalDateTime expirationLocalDateTime;
     private String title;
@@ -25,7 +26,7 @@ public class Task {
     private String directionsDuration;
 
     public Task(Integer locationCount, Boolean areLocationsOrdered, Double[] locationLats, Double[] locationLongs,
-                String[] locationInstructions, String[] locationAddresses, Boolean[] verified,
+                String[] locationInstructions, String[] locationAddresses, String[] locationUserData, Boolean[] locationVerified,
                 LocalDateTime creationLocalDateTime, LocalDateTime expirationLocalDateTime,
                 String title, String description, String state, String user, Integer incentive,
                 Boolean hasDirections, String directionsPath, String directionsDistance, String directionsDuration) {
@@ -35,7 +36,8 @@ public class Task {
         this.locationLongs = locationLongs;
         this.locationInstructions = locationInstructions;
         this.locationAddresses = locationAddresses;
-        this.verified = verified;
+        this.locationUserData = locationUserData;
+        this.locationVerified = locationVerified;
         this.creationLocalDateTime = creationLocalDateTime;
         this.expirationLocalDateTime = expirationLocalDateTime;
         this.title = title;
@@ -109,12 +111,20 @@ public class Task {
         this.locationAddresses = locationAddresses;
     }
 
-    public Boolean[] getVerified() {
-        return verified;
+    public String[] getLocationUserData() {
+        return locationUserData;
     }
 
-    public void setVerified(Boolean[] verified) {
-        this.verified = verified;
+    public void setLocationUserData(String[] locationUserData) {
+        this.locationUserData = locationUserData;
+    }
+
+    public Boolean[] getLocationVerified() {
+        return locationVerified;
+    }
+
+    public void setLocationVerified(Boolean[] locationVerified) {
+        this.locationVerified = locationVerified;
     }
 
     public LocalDateTime getCreationLocalDateTime() {
