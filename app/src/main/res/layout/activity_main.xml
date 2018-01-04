@@ -20,7 +20,7 @@
         android:paddingBottom="4dp"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
-        android:text="@string/searching_tasks"
+        android:text="@string/welcome_to_freeride"
         />
 
     <ProgressBar
@@ -70,7 +70,7 @@
         android:layout_margin="8dp"
         android:textColor="@color/black"
         android:textSize="18sp"
-        tools:text="True/False"
+        tools:text=""
         />
 
     <Button

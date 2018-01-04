@@ -31,15 +31,43 @@ public class DatabaseOperations {
 
     public static boolean connected;
 
+    private static final DatabaseReference acceptedTasks =
+            FirebaseDatabase.getInstance().getReference("acceptedTasks");
     private static final DatabaseReference mDatabaseUserTaskMessages =
             FirebaseDatabase.getInstance().getReference("messages/userTaskInfo");
     private static final DatabaseReference treatmentAll_TasksRef =
             FirebaseDatabase.getInstance().getReference("tasks/treatmentAll");
-    private static final DatabaseReference userAcceptedTasks =
-            FirebaseDatabase.getInstance().getReference("userAcceptedTasks");
     private static final DatabaseReference userTaskActivity =
-            FirebaseDatabase.getInstance().getReference("userAcceptedTasks");
+            FirebaseDatabase.getInstance().getReference("userTaskActivity");
     private static final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
+
+
+    public static void getUserAcceptedTasks() {
+        Log.d(TAG, "Getting user accepted tasks.");
+        final String userId = FirebaseInstanceId.getInstance().getToken();
+        if (userId == null) {
+            Log.e(TAG, "Firebase token returned null");
+            return;
+        }
+
+        final DatabaseReference userAcceptedTasks = acceptedTasks.child(userId);
+        userAcceptedTasks.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) {
+                    //User doesn't have accepted task
+                    //TODO open task search activity
+                } else {
+                    //User has accepted task
+                    //TODO open current task screen
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+    }
 
 
     /**

@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         checkPlayServices();
+        DatabaseOperations.getUserAcceptedTasks();
         FirebaseMessaging.getInstance().subscribeToTopic("ALL");
         activity = this;
         context = this;
@@ -91,6 +92,8 @@ public class MainActivity extends AppCompatActivity{
                 DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
             }
         });
+
+
 
         //Speeds up the loading of the TasksAndMapActivity by pre-loading assets for the map.
         new Thread(new Runnable() {
