@@ -42,31 +42,32 @@ public class DatabaseOperations {
     private static final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
 
 
-    public static void getUserAcceptedTasks() {
-        Log.d(TAG, "Getting user accepted tasks.");
+    public static void getUserAcceptedTask(ValueEventListener userAcceptedTaskListner) {
+        Log.d(TAG, "Getting user accepted task.");
         final String userId = FirebaseInstanceId.getInstance().getToken();
         if (userId == null) {
-            Log.e(TAG, "Firebase token returned null");
+            Log.e(TAG, "Firebase get (userId) token returned null");
             return;
         }
 
         final DatabaseReference userAcceptedTasks = acceptedTasks.child(userId);
-        userAcceptedTasks.addListenerForSingleValueEvent(new ValueEventListener() {
+        userAcceptedTasks.addListenerForSingleValueEvent(userAcceptedTaskListner);
+
+    }
+
+    public static void openUserAcceptedTask(String taskId, final Context context) {
+        treatmentAll_TasksRef.child(taskId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot == null) {
-                    //User doesn't have accepted task
-                    //TODO open task search activity
-                } else {
-                    //User has accepted task
-                    //TODO open current task screen
-                }
+                Intent currentTaskIntent = new Intent(context, CurrentTaskActivity.class);
+                currentTaskIntent.putExtra("task", dataSnapshot.getValue(String.class));
+                context.startActivity(currentTaskIntent);
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
-
     }
 
 
@@ -151,6 +152,7 @@ public class DatabaseOperations {
                         Log.d(TAG, "Task secured");
                         CustomToastMessage.show("Task secured", activity);
                         addUserTaskActivity(taskId, UserTaskActivity.Accepted);
+                        acceptedTasks.child(userId).setValue(taskId);
                         break;
                     case ALREADY_SECURED:
                         Log.d(TAG, "Task already secured by this user");

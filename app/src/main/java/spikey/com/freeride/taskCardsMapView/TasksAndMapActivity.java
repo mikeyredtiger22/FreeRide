@@ -1,5 +1,6 @@
 package spikey.com.freeride.taskCardsMapView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +31,7 @@ public class TasksAndMapActivity extends FragmentActivity
 
     private static final String TAG = TasksAndMapActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 8;
+    private final Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,10 +128,11 @@ public class TasksAndMapActivity extends FragmentActivity
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE &&
-                // If request is cancelled, the result arrays are empty.
-                (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
-            finishActivity(9);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                new AlertDialog.Builder(context)
+                        .setMessage("Location Permission is needed to use this app!").show();
+            }
         }
     }
 

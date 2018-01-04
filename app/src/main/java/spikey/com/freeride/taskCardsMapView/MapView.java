@@ -132,10 +132,15 @@ public class MapView implements
             }
             //todo include directions in bounds?
             addCurrentTaskDirectionsToMap();
+            final LatLngBounds bounds = markerBoundsBuilder.build();
             //Animate google camera to task locations, includes all task location markers
             //in view plus map padding so markers aren't at edges of screen
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(
-                    markerBoundsBuilder.build(), MAP_PADDING));
+            googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_PADDING));
+                }
+            });
         } else { //should never be true
             Log.d(TAG, "Task has no locations");
         }

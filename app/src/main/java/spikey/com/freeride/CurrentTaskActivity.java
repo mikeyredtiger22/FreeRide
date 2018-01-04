@@ -83,6 +83,12 @@ public class CurrentTaskActivity extends AppCompatActivity
             task = gson.fromJson(taskData, Task.class);
         }
 
+        if (intent.hasExtra("color")) {
+            taskColor = intent.getIntExtra("color", 0);
+        } else {
+            taskColor = getResources().getColor(R.color.taskCardColor10);
+        }
+
         currentTaskCardView = findViewById(R.id.current_task_card_view);
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         MAP_WIDTH = screenWidth;
@@ -207,7 +213,7 @@ public class CurrentTaskActivity extends AppCompatActivity
                 @Override
                 public void onMapLoaded() {
                     mapFinal.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_PADDING));
-                    Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT);
+                    Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT); //todo remove variables if not needed
                 }
             });
         } else { //should never be true

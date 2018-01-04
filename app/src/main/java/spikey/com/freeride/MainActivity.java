@@ -3,7 +3,10 @@ package spikey.com.freeride;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -41,13 +44,23 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         checkPlayServices();
-        DatabaseOperations.getUserAcceptedTasks();
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+        progressCircle = findViewById(R.id.progress_circle);
+        connectedValue = findViewById(R.id.connected_value);
+
         FirebaseMessaging.getInstance().subscribeToTopic("ALL");
         activity = this;
         context = this;
 
-        progressCircle = findViewById(R.id.progress_circle);
-        connectedValue = findViewById(R.id.connected_value);
+        progressCircle.setVisibility(View.VISIBLE);
+        DatabaseOperations.getUserAcceptedTask(new UserAcceptedTaskListener());
+
+
 
         //TODO why does this return false first few times?
         ValueEventListener connectedListener = new ValueEventListener() {
@@ -109,6 +122,7 @@ public class MainActivity extends AppCompatActivity{
         }).start();
 
 
+        DatabaseOperations.getUserAcceptedTask(new UserAcceptedTaskListener());
     }
 
     @Override
@@ -122,18 +136,35 @@ public class MainActivity extends AppCompatActivity{
         //DatabaseOperations.databaseMessageTest();
     }
 
-    //still useful?
-    private boolean checkPlayServices() {
+    //todo still useful?
+    private void checkPlayServices() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(this);
         if(result != ConnectionResult.SUCCESS) {
             if(googleAPI.isUserResolvableError(result)) {
-                googleAPI.getErrorDialog(this, result,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                googleAPI.getErrorDialog(this, result, PLAY_SERVICES_RESOLUTION_REQUEST).show();
             }
-            return false;
         }
-        return true;
+    }
+
+    public class UserAcceptedTaskListener implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot acceptedTaskId) {
+            if (acceptedTaskId.getValue() == null) {
+                //User has no accepted tasks
+                //Open task search activity
+                DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
+            } else {
+                //User has accepted tasks
+                //Open current task activity
+                DatabaseOperations.openUserAcceptedTask(acceptedTaskId.getKey(), context);
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.d(TAG, "OnCancelled: " + databaseError);
+        }
     }
 
     public class GetAvailableTasksListener implements ValueEventListener {
