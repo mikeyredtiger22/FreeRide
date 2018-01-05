@@ -20,6 +20,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import spikey.com.freeride.CustomToastMessage;
@@ -46,16 +47,22 @@ public class TasksAndMapActivity extends FragmentActivity
         }
 
 
-        Task[] tasks;
         Intent intent = getIntent();
         if (intent.hasExtra("tasks")) {
             String[] allTasksJsonArray = intent.getStringArrayExtra("tasks");
             if (allTasksJsonArray != null) {
                 Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
                 int taskCount = allTasksJsonArray.length;
-                tasks = new Task[taskCount];
-                for (int i = 0; i < taskCount; i++) {
-                    tasks[i] = gson.fromJson(allTasksJsonArray[i], Task.class);
+                ArrayList<Task> availableTasks = new ArrayList<>();
+                for (String anAllTasksJsonArray : allTasksJsonArray) {
+                    Task task = gson.fromJson(anAllTasksJsonArray, Task.class);
+                    if (task.getState().equals("available")) {
+                        availableTasks.add(task);
+                    }
+                }
+                Task[] tasks = new Task[availableTasks.size()];
+                for (int i = 0; i < availableTasks.size(); i++) {
+                    tasks[i] = availableTasks.get(i);
                 }
                 setUpTaskCardsView(tasks);
             }
@@ -123,6 +130,10 @@ public class TasksAndMapActivity extends FragmentActivity
         markersSwitch.setOnCheckedChangeListener(mapView);
 
     }
+
+    //Removes back button functionality
+    @Override
+    public void onBackPressed() {}
 
     @Override
     public void onRequestPermissionsResult(int requestCode,

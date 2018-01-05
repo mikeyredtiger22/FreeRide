@@ -150,7 +150,7 @@ public class DatabaseOperations {
                     case SUCCESS:
                         Log.d(TAG, "Task secured");
                         CustomToastMessage.show("Task secured", activity);
-                        addUserTaskActivity(taskId, UserTaskActivity.Accepted.toString());
+                        addUserTaskActivity(taskId, userId, UserTaskActivity.Accepted.toString());
                         acceptedTasks.child(userId).setValue(taskId);
                         break;
                     case ALREADY_SECURED:
@@ -187,22 +187,24 @@ public class DatabaseOperations {
         String taskJson = gson.toJson(task);
 
         final String userId = FirebaseInstanceId.getInstance().getToken();
-        addUserTaskActivity(task.getTaskId(), UserTaskActivity.Cancelled.toString());
+        addUserTaskActivity(task.getTaskId(), userId, UserTaskActivity.Cancelled.toString());
         acceptedTasks.child(userId).removeValue();
         treatmentAll_TasksRef.child(task.getTaskId()).setValue(taskJson);
     }
 
     public static void addUserLocationData(final String taskId, Integer locationIndex, String data) {
+        final String userId = FirebaseInstanceId.getInstance().getToken();
         String activityString = "Verified Location, Index: " + locationIndex + ", Data: " + data;
-        addUserTaskActivity(taskId, activityString);
+        addUserTaskActivity(taskId, userId, activityString);
     }
 
     public static void completeTask(String taskId) {
-        addUserTaskActivity(taskId, UserTaskActivity.Completed.toString());
+        final String userId = FirebaseInstanceId.getInstance().getToken();
+        addUserTaskActivity(taskId, userId, UserTaskActivity.Completed.toString());
+        acceptedTasks.child(userId).removeValue();
     }
 
-    private static void addUserTaskActivity(final String taskId, String activity) {
-        final String userId = FirebaseInstanceId.getInstance().getToken();
+    private static void addUserTaskActivity(final String taskId, final String userId, String activity) {
         DatabaseReference activityRef = userTaskActivity.child(userId).child(taskId);
         //Firebase doesn't allow a decimal point inside a path name
         String datePath = LocalDateTime.now().toString().replaceAll("\\.", ",");

@@ -164,6 +164,10 @@ public class CurrentTaskActivity extends AppCompatActivity
 
     }
 
+    //Removes back button functionality
+    @Override
+    public void onBackPressed() {}
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         // Application needs to show Google logo, terms of service for Google Maps API

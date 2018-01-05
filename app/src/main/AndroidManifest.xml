@@ -28,16 +28,15 @@
             android:name=".taskCardsMapView.TasksAndMapActivity"
             android:label="@string/title_activity_maps"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".TaskDetailsActivity"
             android:label="@string/task_details"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
 
         <activity android:name=".CurrentTaskActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <service android:name=".cloudmessaging.CloudMessagingService">
             <intent-filter>
