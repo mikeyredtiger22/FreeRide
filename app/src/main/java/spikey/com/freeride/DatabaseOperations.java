@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder;
 
 import org.joda.time.LocalDateTime;
 
+import java.util.Arrays;
 import java.util.Map;
 
 public class DatabaseOperations {
@@ -45,6 +46,7 @@ public class DatabaseOperations {
     public static void getUserAcceptedTask(ValueEventListener userAcceptedTaskListener) {
         Log.d(TAG, "Getting user accepted task.");
         final String userId = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG, "Firebase userID token: " + userId);
         if (userId == null) {
             Log.e(TAG, "Firebase get (userId) token returned null");
             return;
@@ -148,7 +150,7 @@ public class DatabaseOperations {
                     case SUCCESS:
                         Log.d(TAG, "Task secured");
                         CustomToastMessage.show("Task secured", activity);
-                        addUserTaskActivity(taskId, UserTaskActivity.Accepted);
+                        addUserTaskActivity(taskId, UserTaskActivity.Accepted.toString());
                         acceptedTasks.child(userId).setValue(taskId);
                         break;
                     case ALREADY_SECURED:
@@ -171,13 +173,32 @@ public class DatabaseOperations {
         });
     }
 
-    public static void addUserTaskActivity(final String taskId, UserTaskActivity activity) {
-        addUserTaskActivity(taskId, activity.toString());
+    public static void cancelTask(Task task) {
+        //todo might need to double check that user owns task first
+        //reset task
+        String[] locationUserData = new String[task.getLocationCount()];
+        Boolean[] verified = new Boolean[task.getLocationCount()];
+        Arrays.fill(verified, false);
+
+        task.setState("available");
+        task.setUser(null);
+        task.setLocationUserData(locationUserData);
+        task.setLocationVerified(verified);
+        String taskJson = gson.toJson(task);
+
+        final String userId = FirebaseInstanceId.getInstance().getToken();
+        addUserTaskActivity(task.getTaskId(), UserTaskActivity.Cancelled.toString());
+        acceptedTasks.child(userId).removeValue();
+        treatmentAll_TasksRef.child(task.getTaskId()).setValue(taskJson);
     }
 
-    public static void addUserLocationData(final String taskId, Integer locationVerified) {
-        String activityString = "Verified Location, Index: " + locationVerified;
+    public static void addUserLocationData(final String taskId, Integer locationIndex, String data) {
+        String activityString = "Verified Location, Index: " + locationIndex + ", Data: " + data;
         addUserTaskActivity(taskId, activityString);
+    }
+
+    public static void completeTask(String taskId) {
+        addUserTaskActivity(taskId, UserTaskActivity.Completed.toString());
     }
 
     private static void addUserTaskActivity(final String taskId, String activity) {
@@ -186,8 +207,7 @@ public class DatabaseOperations {
         //Firebase doesn't allow a decimal point inside a path name
         String datePath = LocalDateTime.now().toString().replaceAll("\\.", ",");
         activityRef = activityRef.child(gson.toJson(datePath));
-        String value = activity.toString();
-        activityRef.setValue(value, new DatabaseReference.CompletionListener() {
+        activityRef.setValue(activity, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError != null) {
@@ -198,17 +218,15 @@ public class DatabaseOperations {
         });
     }
 
-    public static void updateTask(Task task, final String property) {
-        Log.d(TAG, "Sending task " + property + " in database: " + task.getTaskId());
+    public static void updateTask(Task task) {
+        Log.d(TAG, "Updating task in database: " + task.getTaskId());
         DatabaseReference taskRef = treatmentAll_TasksRef.child(task.getTaskId());
         String taskJson = gson.toJson(task);
         taskRef.setValue(taskJson, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError == null) {
-                    Log.d(TAG, "Task " + property + " set in database");
-                } else {
-                    Log.d(TAG, "Error on setting task " + property + " : " + databaseError + ", " + databaseReference);
+                if (databaseError != null) {
+                    Log.d(TAG, "Error updating task: " + databaseError + ", " + databaseReference);
                 }
             }
         });

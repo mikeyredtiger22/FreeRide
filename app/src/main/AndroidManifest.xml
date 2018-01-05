@@ -20,7 +20,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,12 +33,10 @@
         <activity
             android:name=".TaskDetailsActivity"
             android:label="@string/task_details"
-            android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
             android:screenOrientation="portrait"
             />
 
         <activity android:name=".CurrentTaskActivity"
-            android:parentActivityName=".taskCardsMapView.TasksAndMapActivity"
             android:screenOrientation="portrait"/>
 
         <service android:name=".cloudmessaging.CloudMessagingService">

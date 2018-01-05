@@ -5,7 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:activity="spikey.com.freeride.MainActivity">
+    tools:activity="spikey.com.freeride.MainActivity"
+
+    android:background="@drawable/gradient_background_main">
 
     <TextView
         android:id="@+id/search_tasks_heading"
@@ -18,75 +20,25 @@
 
         android:paddingTop="12dp"
         android:paddingBottom="4dp"
-        android:textColor="@color/colorPrimary"
-        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:textSize="40sp"
         android:text="@string/welcome_to_freeride"
         />
+
+
+
+
 
     <ProgressBar
         android:id="@+id/progress_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-
-        android:visibility="invisible"
-        />
-
-    <Button
-        android:id="@+id/button_get_tasks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_tasks_heading"
-
-        android:layout_margin="8dp"
-        android:text="@string/get_tasks"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
-        android:theme="@style/ColoredButton.Green"
-        />
-
-    <TextView
-        android:id="@+id/connected_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_get_tasks"
-
-        android:layout_margin="8dp"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:text="@string/connected"
-        />
-
-    <TextView
-        android:id="@+id/connected_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_get_tasks"
-
-        android:layout_margin="8dp"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        tools:text=""
-        />
-
-    <Button
-        android:id="@+id/button_db_connect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/connected_label"
-
-
-        android:layout_margin="8dp"
-        android:text="@string/database_connect"
-        style="@style/Base.Widget.AppCompat.Button.Colored"
-        android:theme="@style/ColoredButton.Blue"
         />
+
 
 
 </android.support.constraint.ConstraintLayout>

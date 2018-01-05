@@ -17,7 +17,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.MapView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         checkPlayServices();
-        DatabaseReference.goOnline();
+        getLocationPermission();
     }
 
     //todo still useful?
@@ -88,6 +87,7 @@ public class MainActivity extends AppCompatActivity{
     public class UserAcceptedTaskListener implements ValueEventListener {
         @Override
         public void onDataChange(DataSnapshot acceptedTaskId) {
+            Log.d(TAG, "accepted task: " + acceptedTaskId);
             if (acceptedTaskId.getValue() == null) {
                 //User has no accepted tasks
                 //Open task search activity
@@ -157,7 +157,8 @@ public class MainActivity extends AppCompatActivity{
                 //Permission denied
                 //Show 'need location' popup and request permission again
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
-                        .setMessage("Location permission is needed to use this application.")
+                        .setMessage("Location permission is needed to use this application.\n" +
+                                "Your location data never leaves the device.")
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {

@@ -57,8 +57,6 @@ public class CurrentTaskActivity extends AppCompatActivity
 
     private static final int MAP_TOP_PADDING = 100;
     private static final int MAP_PADDING = 150;
-    private static int MAP_WIDTH;
-    private static int MAP_HEIGHT;
 
     private Task task;
     private int taskColor;
@@ -90,8 +88,6 @@ public class CurrentTaskActivity extends AppCompatActivity
 
         currentTaskCardView = findViewById(R.id.current_task_card_view);
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        MAP_WIDTH = screenWidth;
-        MAP_HEIGHT = getResources().getDisplayMetrics().heightPixels;
         currentTaskCardView.getLayoutParams().width = (int) (0.85 * screenWidth);
         currentTaskCardView.setCardBackgroundColor(taskColor);
 
@@ -125,6 +121,7 @@ public class CurrentTaskActivity extends AppCompatActivity
         final Activity activity = this;
         final Context context = this;
         final OnCompleteListener<Location> getLocation = this;
+        this.locationProvider = LocationServices.getFusedLocationProviderClient(context);
 
         taskVerifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,7 +150,13 @@ public class CurrentTaskActivity extends AppCompatActivity
             }
         });
 
-        this.locationProvider = LocationServices.getFusedLocationProviderClient(context);
+        taskCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseOperations.cancelTask(task);
+                finish();
+            }
+        });
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.current_task_map_view);
@@ -212,7 +215,6 @@ public class CurrentTaskActivity extends AppCompatActivity
                 @Override
                 public void onMapLoaded() {
                     mapFinal.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_PADDING));
-                    Log.d(TAG, "W: " + MAP_WIDTH + " H: " + MAP_HEIGHT); //todo remove variables if not needed
                 }
             });
         } else { //should never be true
@@ -387,14 +389,14 @@ public class CurrentTaskActivity extends AppCompatActivity
         if (allTasksComplete) {
             CustomToastMessage.show("Task Complete", this);
             task.setState("complete");
-            DatabaseOperations.updateTask(task, "state, verification and location user data");
-            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex);
-            DatabaseOperations.addUserTaskActivity(task.getTaskId(), DatabaseOperations.UserTaskActivity.Completed);
+            DatabaseOperations.updateTask(task);
+            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex, sensorInput);
+            DatabaseOperations.completeTask(task.getTaskId());
             //end activity
             finish();
         } else {
-            DatabaseOperations.updateTask(task, "verification and location user data");
-            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex);
+            DatabaseOperations.updateTask(task);
+            DatabaseOperations.addUserLocationData(task.getTaskId(), locationIndex, sensorInput);
         }
     }
 }
