@@ -42,17 +42,14 @@ public class DatabaseOperations {
     private static final Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
 
 
-    public static void getUserAcceptedTask(ValueEventListener userAcceptedTaskListner) {
+    public static void getUserAcceptedTask(ValueEventListener userAcceptedTaskListener) {
         Log.d(TAG, "Getting user accepted task.");
         final String userId = FirebaseInstanceId.getInstance().getToken();
         if (userId == null) {
             Log.e(TAG, "Firebase get (userId) token returned null");
             return;
         }
-
-        final DatabaseReference userAcceptedTasks = acceptedTasks.child(userId);
-        userAcceptedTasks.addListenerForSingleValueEvent(userAcceptedTaskListner);
-
+        acceptedTasks.child(userId).addListenerForSingleValueEvent(userAcceptedTaskListener);
     }
 
     public static void openUserAcceptedTask(String taskId, final Context context) {

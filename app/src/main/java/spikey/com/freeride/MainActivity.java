@@ -2,17 +2,15 @@ package spikey.com.freeride;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -34,81 +32,20 @@ public class MainActivity extends AppCompatActivity{
     private Activity activity;
     private Context context;
 
-    private ProgressBar progressCircle;
-    private TextView connectedValue;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        checkPlayServices();
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
-
-        progressCircle = findViewById(R.id.progress_circle);
-        connectedValue = findViewById(R.id.connected_value);
-
-        FirebaseMessaging.getInstance().subscribeToTopic("ALL");
         activity = this;
         context = this;
 
-        progressCircle.setVisibility(View.VISIBLE);
-        DatabaseOperations.getUserAcceptedTask(new UserAcceptedTaskListener());
-
-
-
-        //TODO why does this return false first few times?
-        ValueEventListener connectedListener = new ValueEventListener() {
-            boolean connected = false;
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-                    connectedValue.setText(R.string.true_);
-                } else {
-                    connectedValue.setText(R.string.false_);
-                }
-                Log.e(TAG, "Connected = " + connected);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        };
-        DatabaseOperations.connectedToDatabase(connectedListener);
-
-        final Button buttonDbTest = findViewById(R.id.button_db_connect);
-        buttonDbTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                boolean connected = DatabaseOperations.databaseMessageTest();
-                if (connected) {
-                    connectedValue.setText(R.string.true_);
-                } else {
-                    connectedValue.setText(R.string.false_);
-                }
-            }
-        });
-
-
-        final Button buttonGetTasks = findViewById(R.id.button_get_tasks);
-        buttonGetTasks.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressCircle.setVisibility(View.VISIBLE);
-                DatabaseOperations.getAvailableTasks(new GetAvailableTasksListener());
-            }
-        });
-
-
+        FirebaseMessaging.getInstance().subscribeToTopic("ALL");
+        checkPlayServices();
+        getLocationPermission();
 
         //Speeds up the loading of the TasksAndMapActivity by pre-loading assets for the map.
+        //todo needed?
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -121,19 +58,20 @@ public class MainActivity extends AppCompatActivity{
             }
         }).start();
 
+    }
 
+    /*
+    Starts up the application. Only called once location permission is given from user.
+     */
+    private void startUp() {
         DatabaseOperations.getUserAcceptedTask(new UserAcceptedTaskListener());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        progressCircle.setVisibility(View.INVISIBLE);
         checkPlayServices();
-//        DatabaseOperations.connectedToDatabase();
-        DatabaseReference.goOnline();////////////////
-        //DatabaseOperations.listen();
-        //DatabaseOperations.databaseMessageTest();
+        DatabaseReference.goOnline();
     }
 
     //todo still useful?
@@ -157,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
             } else {
                 //User has accepted tasks
                 //Open current task activity
-                DatabaseOperations.openUserAcceptedTask(acceptedTaskId.getKey(), context);
+                DatabaseOperations.openUserAcceptedTask(acceptedTaskId.getValue(String.class), context);
             }
         }
 
@@ -173,7 +111,6 @@ public class MainActivity extends AppCompatActivity{
             if (!dataSnapshot.hasChildren()) {
                 //No tasks received from server
                 CustomToastMessage.show("No Tasks Available", activity);
-                progressCircle.setVisibility(View.INVISIBLE);
                 return;
             }
 
@@ -196,6 +133,39 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onCancelled(DatabaseError databaseError) {
             Log.d(TAG, "OnCancelled: " + databaseError);
+        }
+    }
+
+    private void getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            //Already have permission
+            startUp();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Permission granted
+                startUp();
+            } else {
+                //Permission denied
+                //Show 'need location' popup and request permission again
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
+                        .setMessage("Location permission is needed to use this application.")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                getLocationPermission();
+                            }
+                        });
+                alertDialogBuilder.show();
+            }
         }
     }
 }

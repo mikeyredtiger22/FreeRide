@@ -76,9 +76,8 @@ public class CurrentTaskActivity extends AppCompatActivity
 
         //Get task data
         Intent intent = getIntent();
-        if (intent.hasExtra("task") && intent.hasExtra("color")) {
+        if (intent.hasExtra("task")) {
             Gson gson = Converters.registerLocalDateTime(new GsonBuilder()).create();
-            taskColor = intent.getIntExtra("color", 0);
             String taskData = intent.getStringExtra("task");
             task = gson.fromJson(taskData, Task.class);
         }
