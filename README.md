@@ -15,5 +15,5 @@ See [presentation here](https://docs.google.com/presentation/d/1U-kT-pF_y9sWVm6R
 
 ### Demos
 
-![](DemoMedia/DemoVid1.gif){:height="70px" width="40px"}
+![](DemoMedia/DemoVid1.gif)
 ![](DemoMedia/DemoVid2.gif)
